@@ -1,0 +1,10 @@
+model{
+
+# likelihood of the data
+y.PE ~ dbin(hist.theta.PE, n.PE)
+y.PC ~ dbin(hist.theta.PC, n.PC)
+
+# prior distributions
+hist.theta.PE ~ dbeta(1,1)
+hist.theta.PC ~ dbeta(1,1)
+}
