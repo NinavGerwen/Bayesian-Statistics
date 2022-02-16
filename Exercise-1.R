@@ -12,7 +12,9 @@ source('Exercise 1 - Data.txt')
 
 ## Step 3: Obtaining initial values --------------------------------------------
 
-## Not necessary in this exercise
+## Not necessary in this exercise as this is done automatically
+## However, if you have problems with convergence, you might want to manually
+## do this part.
 
 ## Step 4: Obtaining samples from the posterior distribution of the parameters -
 
@@ -30,18 +32,21 @@ res <- coda.samples(model = model.def, variable.names = parameters, n.iter = 100
 
 ## Step 5: Inspecting convergence ----------------------------------------------
 
-## Not done in this exercise
+## Not done in this exercise. But it is very important! Similar to evaluating
+## your assumptions
 
 ## Step 6: Substantive interpretation ------------------------------------------
 
 summary(res)
 
+## Risk ratio is 0.69, so the recovery chance is smaller for the control group
+## than for the cognitive behavioural therapy group.
 ## These results can also be derived analytically of course through mathematics
 
 ### The same exercise, with historical data
 
-## Picking the study: one investigated women, other one men (same as us)
-## hence we pick the previous study that also investigated men
+## Picking the study: one investigated women, other one men (same as us).
+## Hence, we pick the previous study that also investigated men
 
 ## The chosen weight:
 
@@ -53,18 +58,24 @@ summary(res)
 
 ## obtaining power prior.
 
-hist.dat <- list(y.PE = 40, n.PE = 105, y.PC = 45, n.PC = 130)
+## -------------------- SKIP BELOW
+## hist.dat <- list(y.PE = 40, n.PE = 105, y.PC = 45, n.PC = 130)
 
-hist.model <- jags.model("Exercise 1 - Hist Model.txt", data = hist.dat, n.chains = 2)
-update(object = hist.model, n.iter = 1000)
+## hist.model <- jags.model("Exercise 1 - Hist Model.txt", data = hist.dat, n.chains = 2)
+## update(object = hist.model, n.iter = 1000)
 
-hist.parameters <- c('hist.theta.PC', 'hist.theta.PE')
+## hist.parameters <- c('hist.theta.PC', 'hist.theta.PE')
 
-hist.res <- coda.samples(model = hist.model, variable.names = hist.parameters, n.iter = 10000)
+## hist.res <- coda.samples(model = hist.model, variable.names = hist.parameters, n.iter = 10000)
 
-summary(hist.res)
+## summary(hist.res)
 
-## Okay never mind... Can be done easier. However in the below example I did not do a and b times .4!
+## -------------------- SKIP ABOVE
+## Okay never mind... Can be done easier. However, in the below example I did not do a and b times .4!
+## In other words, i did not apply a weight and used 100% of the data from the historical study.
+
+## How to apply the weights: change the parameters in the data distribution by
+## multiplying them with your chosen weight. -- NOT DONE BELOW!-- weight was 1
 
 ## New model:
 
@@ -82,5 +93,8 @@ summary(res)
 
 ## RR went from .69 to .78 
 
-## Step 5: Inspecting convergence ----------------------------------------------
+## Something about priors:
+
+## Adding a prior is not very different from adding extra data... So adding a 
+## prior will make your estimates always more certain (even if it is in the wrong direction)
 
