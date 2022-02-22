@@ -1,0 +1,23 @@
+model {
+## likelihood in a for-loop:
+	for (i in 1:172) {
+		attitude[i] ~ dnorm(mu[i], tau)
+		mu[i] <- beta0 + beta1 * extraversion[i] + beta2 * agreeableness[i] + beta3 * (agreeableness[i] - agreeableness.bar) * (extraversion[i] - extraversion.bar)
+		## remove past beta2 for no interaction
+		## if wanted, you can center x's by doing (x[i] - x.bar) and specifying x.bar
+
+}
+agreeableness.bar <- mean(agreeableness)
+extraversion.bar <- mean(extraversion)
+## Prior distributions:
+beta0 ~ dnorm(0.0, 0.00001)
+## Variance is in the form of precision (1/variance), so for uninformative, it should be very small (a.k.a. large variance)
+beta1 ~ dnorm(0.0, 0.00001)
+beta2 ~ dnorm(0.0, 0.00001)
+beta3 ~ dnorm(0.0, 0.00001)
+## This is so we get standard deviation:
+sigma <- 1.0/sqrt(tau)
+
+## Prior for residual variance:
+tau ~ dgamma(0.001, 0.001)
+}

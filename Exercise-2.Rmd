@@ -1,0 +1,89 @@
+---
+title: "Exercise 2 - Bayesian"
+author: "Nina van Gerwen (1860852)"
+date: "2/22/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## A: Loading the dataset
+
+```{r}
+library(haven)
+library(rjags)
+
+ex2 <- read_sav("Exercise 2 - Data.sav")
+```
+
+## B: Specifying the regression model
+
+This is done in a separate text file.
+
+## C: Specifying initial values
+
+They need to be in a list of a list, initial list should be same length as the number of chains
+```{r}
+model.def <- jags.model(file = "Exercise 2 - Model.txt", data = ex2, n.chains = 2, inits = list(beta0 = 0, beta1 = 3, beta2 = 2.03))
+
+update(model.def, n.iter = 1500)
+```
+
+## D: Obtaining samples from the posterior
+
+```{r}
+parameters <- c("beta0", "beta1", "beta2", "sigma")
+
+set.seed(3)
+
+results <- coda.samples(model = model.def, variable.names = parameters, n.iter = 10000)
+summary(results)
+```
+
+## E: Assessing convergence
+
+```{r}
+## History plot per parameter
+plot(results)
+
+## Autocorrelation plots
+autocorr.plot(results)
+
+## Gelman-Rubin diagnostic plot
+gelman.plot(results)
+```
+
+## F: Substantive interpretation
+
+Visual indication of the history plot shows sound convergence. Furthermore, the autocorrelation plots also shows that the autocorrelation for all parameters converges to 0. Finally, the Gelman-Rubin diagnostic plot also shows sound convergence for every parameter.
+
+A multiple linear regression with agreeableness and extraversion as independent variables and attitude towards pet ownership as the dependent variable shows that both independent variables 95% HDI contain zero. Hence, they are nonsignificant and not particularly useful in predicting attitude towards pet ownership.
+
+## G: Interaction
+
+Added an interaction term to the text file and redid the analyses.
+```{r}
+int.model.def <- jags.model(file = "Exercise 2 - Model.txt", data = ex2, n.chains = 2, inits = list(beta0 = 0, beta1 = 3, beta2 = 2.03, beta3 = 1.09))
+
+update(int.model.def, n.iter = 1500)
+
+int.parameters <- c("beta0", "beta1", "beta2", "beta3", "sigma")
+
+set.seed(3)
+
+int.results <- coda.samples(model = int.model.def, variable.names = int.parameters, n.iter = 10000)
+summary(int.results)
+
+plot(int.results)
+
+autocorr.plot(int.results)
+
+gelman.plot(int.results)
+```
+
+## Missing Data
+
+Did not do. Make notes in class
+
