@@ -1,6 +1,6 @@
 model {
 ## likelihood in a for-loop:
-	for (i in 1:172) {
+	for (i in 1:length(attitude)) {
 		attitude[i] ~ dnorm(mu[i], tau)
 		mu[i] <- beta0 + beta1 * extraversion[i] + beta2 * agreeableness[i] + beta3 * (agreeableness[i] - agreeableness.bar) * (extraversion[i] - extraversion.bar)
 		## remove past beta2 for no interaction
@@ -21,3 +21,5 @@ sigma <- 1.0/sqrt(tau)
 ## Prior for residual variance:
 tau ~ dgamma(0.001, 0.001)
 }
+
+## Can also do betas in a vector and then do the priors in a for-loop!
