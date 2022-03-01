@@ -7,7 +7,7 @@ output: pdf_document
 
 ```{r}
 
-GibbsSampler <- function(data, burn.in = 1000, iterations = 10000, initial.values) {
+GibbsSampler <- function(data, N = ..., SD = ..., burn.in = 1000, iterations = 10000, initial.values) {
   ## First create space
   b0 <- rep(NA, iterations)
   b1 <- rep(NA, iterations)
@@ -16,16 +16,29 @@ GibbsSampler <- function(data, burn.in = 1000, iterations = 10000, initial.value
   b0[1] <- initial.value[1]
   b1[1] <- initial.value[2]
   b2[1] <- initial.value[3]
-  var[1] <- 1
+  vari[1] <- 1
   ## In every iteration, the values of the parameters of the conditional
   ## posteriors should be calculated as functions of the prior parameters,
   ## the data and the current values of the other model parameters
   
   for(i in 2:iterations) {
+    mean.0.post <- (sum(...)/SD^2 + mean(b0)/var(b0)) / ((N / SD^2) + (1 / var(b0)))
+    sd.0.post <- 1/((N / SD^2) + (1 / var(b0)))
+    
+    mean.1.post <- (sum(...)/SD^2 + mean(b1)/var(b1)) / sum(...)/SD^2 + (1 / var(b1))
+    sd.1.post <- 1/((sum(...) / SD^2) + (1 / var(b0)))
+    
+    mean.2.post <- ...
+    sd.2.post <- ...
+    
+    a.post <- N / 2 + alpha0
+    b.post <- SSE / 2 + beta0
+    
+    ## Now to update the parameters, given the values above
     b0[i] <- rnorm(n = 1, mean = mean.0.post, sd = sd.0.post)
     b1[i] <- rnorm(n = 1, mean = mean.1.post, sd = sd.1.post)
     b2[i] <- rnorm(n = 1, mean = mean.2.post, sd = sd.2.post)
-    var[i] <- 1/rgamma(n = 1, shape = a.post, rate = b.post)
+    vari[i] <- 1/rgamma(n = 1, shape = a.post, rate = b.post)
   }
   b0 <- b0[-c(1:burn.in)]
   b1 <- b1[-c(1:burn.in)]
