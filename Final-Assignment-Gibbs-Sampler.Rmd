@@ -1,0 +1,46 @@
+---
+title: "Final Assignment - Gibbs Sampler"
+author: "Nina van Gerwen (1860852)"
+date: "3/1/2022"
+output: pdf_document
+---
+
+```{r}
+
+GibbsSampler <- function(data, burn.in = 1000, iterations = 10000, initial.values) {
+  ## First create space
+  b0 <- rep(NA, iterations)
+  b1 <- rep(NA, iterations)
+  b2 <- rep(NA, iterations)
+  var <- rep(NA, iterations)
+  b0[1] <- initial.value[1]
+  b1[1] <- initial.value[2]
+  b2[1] <- initial.value[3]
+  var[1] <- 1
+  ## In every iteration, the values of the parameters of the conditional
+  ## posteriors should be calculated as functions of the prior parameters,
+  ## the data and the current values of the other model parameters
+  
+  for(i in 2:iterations) {
+    b0[i] <- rnorm(n = 1, mean = mean.0.post, sd = sd.0.post)
+    b1[i] <- rnorm(n = 1, mean = mean.1.post, sd = sd.1.post)
+    b2[i] <- rnorm(n = 1, mean = mean.2.post, sd = sd.2.post)
+    var[i] <- 1/rgamma(n = 1, shape = a.post, rate = b.post)
+  }
+  b0 <- b0[-c(1:burn.in)]
+  b1 <- b1[-c(1:burn.in)]
+  b2 <- b2[-c(1:burn.in)]
+  var <- var[-c(1:burn.in)]
+  
+  return(...)
+  
+  ## Now, we also want the posterior distributions (histograms) of all parameters
+  par(mfrow = c(2,2))
+  hist(b0)
+  hist(b1)
+  hist(b2)
+  hist(var)
+}
+
+```
+
