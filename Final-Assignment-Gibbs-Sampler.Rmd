@@ -7,7 +7,7 @@ output: pdf_document
 
 ```{r}
 
-GibbsSampler <- function(data, N = ..., SD = ..., burn.in = 1000, iterations = 10000, initial.values) {
+GibbsSampler <- function(Y, X1, X2, SD = ..., burn.in = 1000, iterations = 10000, initial.values) {
   ## First create space
   b0 <- rep(NA, iterations)
   b1 <- rep(NA, iterations)
@@ -17,27 +17,43 @@ GibbsSampler <- function(data, N = ..., SD = ..., burn.in = 1000, iterations = 1
   b1[1] <- initial.value[2]
   b2[1] <- initial.value[3]
   vari[1] <- 1
+  N <- length(Y)
   ## In every iteration, the values of the parameters of the conditional
   ## posteriors should be calculated as functions of the prior parameters,
   ## the data and the current values of the other model parameters
   
   for(i in 2:iterations) {
-    mean.0.post <- (sum(...)/SD^2 + mean(b0)/var(b0)) / ((N / SD^2) + (1 / var(b0)))
+    
+    ## First, we should update the parameters of the intercept (mean and standard deviation) with the following formula:
+    ## 10000 because informative prior?
+    mean.0.post <- (sum(Y - b1[i - 1]*X1 - b2[i - 1]*X2)/vari[i - 1] + (mean(b0) / 10000)) / ((N / vari[i - 1]) + (1 / 10000))
     sd.0.post <- 1/((N / SD^2) + (1 / var(b0)))
     
-    mean.1.post <- (sum(...)/SD^2 + mean(b1)/var(b1)) / sum(...)/SD^2 + (1 / var(b1))
-    sd.1.post <- 1/((sum(...) / SD^2) + (1 / var(b0)))
-    
-    mean.2.post <- ...
-    sd.2.post <- ...
-    
-    a.post <- N / 2 + alpha0
-    b.post <- SSE / 2 + beta0
-    
-    ## Now to update the parameters, given the values above
+    ## Then through rnorm we randomly sample from a normal distribution the next value for b0 with the
+    ## above calculated mean and standard deviation
     b0[i] <- rnorm(n = 1, mean = mean.0.post, sd = sd.0.post)
+    
+    ## Now, we can update the mean and standard deviation of the regression coefficient for the first variable
+    ## using the updated value of the intercept
+    mean.1.post <- (sum(X1*(Y - b0[i] - b2[i - 1]*X2))/vari[i - 1] + (mean(b1) / 10000)) / sum(X1^2)/vari[i - 1] + (1 / 10000)
+    sd.1.post <- 1/((sum(X1^2) / vari[i - 1]) + (1 / 10000))
+    
+    ## Then again we randomly sample a new b1
     b1[i] <- rnorm(n = 1, mean = mean.1.post, sd = sd.1.post)
+    
+    ## Afterwards, we update the mean and standard deviation of the regression coefficient for the second variable
+    ## using the updated value of both the intercept and b1
+    mean.2.post <- (sum(X2*(Y - b0[i] - b1[i]*X1))/vari[i - 1] + (mean(b2) / 10000)) / sum(X2^2)/vari[i - 1] + (1 / 10000)
+    sd.2.post <- 1/((sum(X2^2) / vari[i - 1]) + (1 / 10000))
+   
+    ## Then, we randomly sample a new b2
     b2[i] <- rnorm(n = 1, mean = mean.2.post, sd = sd.2.post)
+    
+    ## Finally, we update the parameters for the distribution of our standard deviation using all above updated values
+    a.post <- N / 2+ 0.001 ## uninformative priors
+    b.post <- sum((Y - (b0[i] + b1[i]*X1 + b2[i]*X2))^2) / 2 + 0.001
+
+    ## And randomly sample a new variance again for
     vari[i] <- 1/rgamma(n = 1, shape = a.post, rate = b.post)
   }
   b0 <- b0[-c(1:burn.in)]
