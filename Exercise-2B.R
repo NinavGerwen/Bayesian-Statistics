@@ -22,7 +22,7 @@ y <- rep(0, 10000)
 y[1] <- .000001
 
 for(i in 2:iter) {
-  prop_value <- y[i - 1] + runif(1, 0, 1)
+  prop_value <- runif(1, 0, 1)
   
   random_value <- runif(1, 0, 1)
   
@@ -34,3 +34,4 @@ for(i in 2:iter) {
 }
 
 plot(y)
+hist(y)
