@@ -5,7 +5,12 @@ date: "3/1/2022"
 output: pdf_document
 ---
 
-```{r}
+## The Gibbs Sampler with an option for Metropolis-Hastings
+
+Because we assume that all predictors are normally distributed, the Gibbs
+Sampler can work in the following fashion.
+
+```{r Gibbs + MH Sampler}
 ## First, all priors have to be set
 
 a.prior <- 0.001
@@ -20,7 +25,22 @@ sigma1 <- 10000
 mu2 <- 1
 sigma2 <- 10000
 
-GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.values = c(1.5, 2, 0.5)) {
+## For the input of the Gibbs Sampler, one should provide: 
+        ## a vector of continuous variables that serves as your dependent variable
+        ## two vectors of continuous variables that serve as your independent variables
+        ## a burn.in period (by default 1000 iterations)
+        ## a total amount of iterations (by default 10000)
+        ## the initial values for every regression coefficient
+        ## a method function that specifies per parameter whether they would 
+        ## like to have it sampled through a Gibbs Sampler or Metropolis Hastings algorithm
+          ## by default, it assumes a Gibbs sampler for every regression coefficient, 
+          ## and if you want to redefine it to a MH, you should change the 0 to a 1
+          ## for the regression coefficient you want to change
+              ## Examples: 
+                ## method = c(0, 1, 0) will make it so that b1 is done through MH
+GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.values = c(1, 1, 1), method = c(0, 0, 0)) {
+  ## First, the function should require ggplot2 as it is used to create traceplots later
+  library(ggplot2)
   ## First create space
   b0 <- rep(0, iterations)
   b1 <- rep(0, iterations)
@@ -33,63 +53,102 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.
   b2[1] <- initial.values[3]
   vari[1] <- 1
   N <- length(Y)
-  ## In every iteration, the values of the parameters of the conditional
-  ## posteriors should be calculated as functions of the prior parameters,
-  ## the data and the current values of the other model parameters
-
+ 
+  ## Now, we will start the sampling, it should start at the second element
+  ## because the first element will be the initial values
   for(i in 2:iterations) {
     
-    ## First, we should update the parameters of the intercept (mean and standard deviation) with the following formula:
-    ## 10000 because informative prior?
-    mean.0.post <- (sum(Y - b1[i - 1]*X1 - b2[i - 1]*X2, na.rm = TRUE)/vari[i - 1] + (mu0 / sigma0)) / ((N / vari[i - 1]) + (mu0 / sigma0))
-    sd.0.post <- 1 / ((N / vari[i - 1]) + (mu0 / sigma0))
+    ## In every loop, We first update the intercept:
+    ## Check whether the intercept should be sampled through Gibbs or MH
+    if(method[1] == 0) {
+      
+      ## If through Gibbs Sampler:
+      
+      ## First, we update the parameters of the intercept (mean and standard deviation) with the following formula:
+    
+      mean.0.post <- (sum(Y - b1[i - 1]*X1 - b2[i - 1]*X2, na.rm = TRUE)/vari[i - 1] + (mu0 / sigma0)) / ((N / vari[i - 1]) + (mu0 / sigma0))
+      sd.0.post <- 1 / ((N / vari[i - 1]) + (mu0 / sigma0))
 
-    ## Then through rnorm we randomly sample from a normal distribution the next value for b0 with the
-    ## above calculated mean and standard deviation
-    b0[i] <- rnorm(n = 1, mean = mean.0.post, sd = sd.0.post)
+      ## Then through rnorm we randomly sample from a normal distribution the next value for b0 with the
+      ## above calculated mean and standard deviation
+      b0[i] <- rnorm(n = 1, mean = mean.0.post, sd = sd.0.post)
+    } else {
+      
+      ## If through MH:
+      
+      ## First...
+    }
  
-    ## Now, we can update the mean and standard deviation of the regression coefficient for the first variable
-    ## using the updated value of the intercept
-    mean.1.post <- (sum(X1*(Y - b0[i] - b2[i - 1]*X2), na.rm = TRUE)/vari[i - 1] + (mu1 / sigma1)) / sum(X1^2, na.rm = TRUE)/vari[i - 1] + (mu1 / sigma1)
-    sd.1.post <- 1/((sum(X1^2, na.rm = TRUE) / vari[i - 1]) + (mu1 / sigma1))
+    ## Then, every loop, we will update the coefficient of the first independent variable
     
-    ## Then again we randomly sample a new b1
-    b1[i] <- rnorm(n = 1, mean = mean.1.post, sd = sd.1.post)
+    ## Again, check whether Gibbs or MH:
+    if(method[2] == 0) {
     
-    ## Afterwards, we update the mean and standard deviation of the regression coefficient for the second variable
-    ## using the updated value of both the intercept and b1
-    mean.2.post <- (sum(X2*(Y - b0[i] - b1[i]*X1), na.rm = TRUE)/vari[i - 1] + (mu2 / sigma2)) / sum(X2^2, na.rm = TRUE)/vari[i - 1] + (mu2 / sigma2)
-    sd.2.post <- 1/((sum(X2^2, na.rm = TRUE) / vari[i - 1]) + (mu2 / sigma2))
+      ## If through Gibbs:
+      
+      ## We can update the mean and standard deviation of the regression coefficient for the first variable
+      ## using the updated value of the intercept
+      mean.1.post <- (sum(X1*(Y - b0[i] - b2[i - 1]*X2), na.rm = TRUE)/vari[i - 1] + (mu1 / sigma1)) / sum(X1^2, na.rm = TRUE)/vari[i - 1] + (mu1 / sigma1)
+      sd.1.post <- 1/((sum(X1^2, na.rm = TRUE) / vari[i - 1]) + (mu1 / sigma1))
+    
+      ## Then again we randomly sample a new b1 through rnorm
+      b1[i] <- rnorm(n = 1, mean = mean.1.post, sd = sd.1.post)
+    } else {
+      ## If through MH:
+      
+      ## First... 
+    }
+    
+    ## Then, every loop, we update the regression coefficient of the second variable
+    
+    ## But first check whether Gibbs oR MH:
+
+    if(method[3] == 0) {
+      
+      ## If through Gibbs:
+    
+      ## We update the mean and standard deviation of the regression coefficient for the second variable
+      ## using the updated value of both the intercept and b1
+      mean.2.post <- (sum(X2*(Y - b0[i] - b1[i]*X1), na.rm = TRUE)/vari[i - 1] + (mu2 / sigma2)) / sum(X2^2, na.rm = TRUE)/vari[i - 1] + (mu2 / sigma2)
+      sd.2.post <- 1/((sum(X2^2, na.rm = TRUE) / vari[i - 1]) + (mu2 / sigma2))
    
-    ## Then, we randomly sample a new b2
-    b2[i] <- rnorm(n = 1, mean = mean.2.post, sd = sd.2.post)
+      ## Then, we randomly sample a new b2
+      b2[i] <- rnorm(n = 1, mean = mean.2.post, sd = sd.2.post)
+    } else {
+      ## If through MH:
+      
+      ## ...
+    }
     
-    ## Finally, we update the parameters for the distribution of our standard deviation using all above updated values
+    ## Finally, we update the parameters for the distribution of our variance using all above updated values
     a.post <- N / 2 + a.prior
     b.post <- sum((Y - (b0[i] + b1[i]*X1 + b2[i]*X2))^2, na.rm = TRUE) / 2 + b.prior
 
-    ## And randomly sample a new variance again for
+    ## And randomly sample a new variance again through rgamma
     vari[i] <- 1/rgamma(n = 1, shape = a.post, rate = b.post)
+      ## We use the inverse of the randomly sample because we want the value of the variance, and not the precision.
   }
   
+  ## Then, we remove the values of the burn-in
   b0 <- b0[-c(1:burn.in)]
   b1 <- b1[-c(1:burn.in)]
   b2 <- b2[-c(1:burn.in)]
   vari <- vari[-c(1:burn.in)]
   
-  ## Now, we also want the posterior distributions (histograms) of all parameters
+  ## We also want the posterior distributions (histograms) of all parameters
   par(mfrow = c(2,2))
-  hist(b0)
+  hist(b0, breaks = 50)
   abline(v = mean(b0), col = "blue")
-  hist(b1)
+  hist(b1, breaks = 50)
   abline(v = mean(b1), col = "blue")
-  hist(b2)
+  hist(b2, breaks = 50)
   abline(v = mean(b2), col = "blue")
-  hist(vari)
+  hist(vari, breaks = 50)
   
-  
+  ## We want a dataframe consisting of all the sampled parameter values
   data_frame <- as.data.frame(cbind(b0, b1, b2, vari, iter = 1:length(b0)))
   
+  ## And we want traceplots for all the parameters to assess convergence
   traceplot1 <- ggplot(data_frame, aes(x=iter, y=b0)) + 
     geom_line() + 
     labs(title="b0 trace")
@@ -110,15 +169,17 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.
     labs(title="var trace")
   traceplot4
   
-  
+  ## We create a list of all the output we want
   list_of_output <- list(data_frame, traceplot1, traceplot2, traceplot3, traceplot4)
+  
+  ## And finally, we ask the function to return this list of output
   return(list_of_output)
 }
 
 ```
 
 ```{r}
-## test the sampler
+## Testing the sampler
 library(haven)
 data <- read_sav("Exercise 2 - Data.sav")
 str(data)
@@ -127,10 +188,21 @@ summary(lm(attitude ~ extraversion + agreeableness, data = data))
 
 GibbsSampler(data$attitude, data$extraversion, data$agreeableness, burn.in = 1000, iterations = 10000)
 
-A <- 1:100
-B <- 101:200
-
-cbind(A, B)
 ```
+
+## Autocorrelation plot
+
+Although we already created traceplots to assess convergence, it is always best
+to assess it in multiple ways. Hence, I'll make a function that, when given 
+all randomly sampled values for a parameter, will return an autocorrelation plot.
+
+```{r Autocor plot}
+
+autocorrelationplot <- function(X) {
+  
+}
+
+```
+
 
 

@@ -132,39 +132,39 @@ on each of the replicated datasets so we can compare our 'fixed' test-statistic
 to these.
 
 ```{r}
-test.statistics.PE <- rep(NA, ncol(replicated.PE.chain1) + ncol(replicated.PE.chain2))
-test.statistics.PC <- rep(NA, ncol(replicated.PC.chain1) + ncol(replicated.PC.chain2))
+test.statistics.PE <- rep(NA, nrow(replicated.PE.chain1) + nrow(replicated.PE.chain2))
+test.statistics.PC <- rep(NA, nrow(replicated.PC.chain1) + nrow(replicated.PC.chain2))
 
 ## First, we calculate the statistics for the PE treatment
-for(i in 1:ncol(replicated.PE.chain1)){
-  half1 <- sum(replicated.PE.chain1[1:(nrow(replicated.PE.chain1)/2), i])/(nrow(replicated.PE.chain1)/2)
-  half2 <- sum(replicated.PE.chain1[(nrow(replicated.PE.chain1)/2 + 1):nrow(replicated.PE.chain1), i])/(nrow(replicated.PE.chain1)/2 + 1)
+for(i in 1:nrow(replicated.PE.chain1)){
+  half1 <- sum(replicated.PE.chain1[i, 1:(ncol(replicated.PE.chain1)/2)])/(ncol(replicated.PE.chain1)/2)
+  half2 <- sum(replicated.PE.chain1[i, (ncol(replicated.PE.chain1)/2 + 1):ncol(replicated.PE.chain1)])/(ncol(replicated.PE.chain1)/2 + 1)
   
   test.statistics.PE[i] <- half1 - half2
   
 }
 
-for(i in 1:ncol(replicated.PE.chain2)) {
-  half1 <- sum(replicated.PE.chain2[1:(nrow(replicated.PE.chain2)/2), i])/(nrow(replicated.PE.chain2)/2)
-  half2 <- sum(replicated.PE.chain2[(nrow(replicated.PE.chain2)/2 + 1):nrow(replicated.PE.chain2), i])/(nrow(replicated.PE.chain2)/2 + 1)
+for(i in 1:nrow(replicated.PE.chain2)) {
+  half1 <- sum(replicated.PE.chain2[i, 1:(ncol(replicated.PE.chain2)/2)])/(ncol(replicated.PE.chain2)/2)
+  half2 <- sum(replicated.PE.chain2[i, (ncol(replicated.PE.chain2)/2 + 1):ncol(replicated.PE.chain2)])/(ncol(replicated.PE.chain2)/2 + 1)
   
-  test.statistics.PE[i + ncol(replicated.PE.chain1)] <- half1 - half2
+  test.statistics.PE[i + nrow(replicated.PE.chain1)] <- half1 - half2
 }
 
 ## Then the statistic for the PC treatment
-for(i in 1:ncol(replicated.PC.chain1)){
-  half1 <- sum(replicated.PC.chain1[1:(nrow(replicated.PC.chain1)/2), i])/(nrow(replicated.PC.chain1)/2)
-  half2 <- sum(replicated.PC.chain1[(nrow(replicated.PC.chain1)/2 + 1):nrow(replicated.PC.chain1), i])/(nrow(replicated.PC.chain1)/2 + 1)
+for(i in 1:nrow(replicated.PC.chain1)){
+  half1 <- sum(replicated.PC.chain1[i, 1:(ncol(replicated.PC.chain1)/2)])/(ncol(replicated.PC.chain1)/2)
+  half2 <- sum(replicated.PC.chain1[i, (ncol(replicated.PC.chain1)/2 + 1):ncol(replicated.PC.chain1)])/(ncol(replicated.PC.chain1)/2 + 1)
   
   test.statistics.PC[i] <- half1 - half2
   
 }
 
-for(i in 1:ncol(replicated.PC.chain2)) {
-  half1 <- sum(replicated.PC.chain2[1:(nrow(replicated.PC.chain2)/2), i])/(nrow(replicated.PC.chain2)/2)
-  half2 <- sum(replicated.PC.chain2[(nrow(replicated.PC.chain2)/2 + 1):nrow(replicated.PC.chain2), i])/(nrow(replicated.PC.chain2)/2 + 1)
+for(i in 1:nrow(replicated.PC.chain2)) {
+  half1 <- sum(replicated.PC.chain2[i, 1:(ncol(replicated.PC.chain2)/2)])/(ncol(replicated.PC.chain2)/2)
+  half2 <- sum(replicated.PC.chain2[i, (ncol(replicated.PC.chain2)/2 + 1):ncol(replicated.PC.chain2)])/(ncol(replicated.PC.chain2)/2 + 1)
   
-  test.statistics.PC[i + ncol(replicated.PC.chain1)] <- half1 - half2
+  test.statistics.PC[i + nrow(replicated.PC.chain1)] <- half1 - half2
 }
 
 test.statistics.PE
@@ -195,15 +195,22 @@ ifelse(abs(test.statistics.PE) > abs(diff.PE), 1, 0) %>% mean(.)
 
 ## G: Interpreting the posterior predictive p-values
 
-Turns out, never are the test statistics for the replicated data sets larger
-than the one from our empirical data set. So for both groups *p < .001*.
+Turns out, for the PC group, the test statistics for the replicated data sets are larger
+than the one from our empirical data set very rarely (*p = .003*).
+
+However, for the PE group, the test statistics for the replicated data sets are larger
+than the one from our empirical data set almost 50% of the time (*p = .452*).
 
 In other words, in the replicated data sets, using parameter values gained from
 our posterior distribution, the probability of finding a more extreme difference
-in recoveries in your first and second half is very small.
+in recoveries in your first and second half is very small for the PC group but
+quite normal for the PE group.
 
 This means that perhaps a binomial distribution might not fit the data very well
-and perhaps we should look into alternatives.
+in the PC group, but it does fit well in the PE group.
+
+In other words, perhaps we should find another model of the data for the PC group.
+
 
 Similarities and differences with classical hypothesis testing:
 A lot...
