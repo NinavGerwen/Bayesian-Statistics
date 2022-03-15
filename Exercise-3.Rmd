@@ -1,0 +1,213 @@
+---
+title: "Exercise 3 - Bayesian Statistics"
+author: "Nina van Gerwen (1860852)"
+date: "3/15/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data preparation
+
+```{r Data prep }
+source("Exercise 3 - Data.txt")
+```
+
+## A: Recognizing model assumptions
+
+We used two binomial models for the number of persons that lost their diagnosis,
+estimating the probability of recovery separately for the PE and PC group.
+
+The fact that we use a binomial distribution means that first of all, all
+observations are independent from one another (and all follow a Bernoulli trial). 
+Furthermore, we assume different parameters for the two types of interventions
+and that the interventions have the exact same effect on every person.
+
+One reason this might not hold might be because the effect of treatment might
+differ per person. Furthermore, the treatment might get better after every trial
+due to more experience giving the treatment.
+
+## B: Writing the equivalent model for the raw (individual) data
+
+```{r}
+library(rjags)
+```
+
+Writing the model for the raw data is in the model .txt file.
+
+I decided on a Bernoulli distribution for every person with a parameter
+that is decided by which intervention you receive.
+
+## C: Runing the analysis, checking the results against Exercise 1
+
+```{r}
+model.def <- jags.model(file = "Exercise 3 - Model_template.txt", data = dat, 
+                        n.chains = 2, 
+                        inits = list(theta.PC = .45, theta.PE = .55))
+
+update(model.def, n.iter = 2500)
+
+parameters <- c('theta.PE', 'theta.PC', 'RR')
+
+set.seed(3)
+
+results <- coda.samples(model = model.def, variable.names = parameters, n.iter = 12500)
+summary(results)
+
+## Assessing convergence
+
+plot(results)
+
+## Autocorrelation plots
+autocorr.plot(results)
+
+## Gelman-Rubin diagnostic plot
+gelman.plot(results)
+```
+
+The results are very similar to those of exercise 1! It works.
+Convergence also seems okay. 
+
+## D: Specifying test statistic for the empirical data
+
+One way of testing whether a binomial distribution fits the data is to check 
+whether the proportion of recoveries (LD) in the first half of each group is 
+equal to the proportion in the second half of that group
+
+```{r}
+## Calculating the above defined test statistic
+
+# test statistic for the PE condition
+proportion.half1.PE <- sum(dat$LD.PE[1:70])/70
+proportion.half2.PE <- sum(dat$LD.PE[71:141])/71
+diff.PE <- proportion.half1.PE - proportion.half2.PE
+# test statistic for the PC condition
+proportion.half1.PC <- sum(dat$LD.PC[1:71])/71
+proportion.half2.PC <- sum(dat$LD.PC[72:143])/72
+diff.PC <- proportion.half1.PC - proportion.half2.PC
+
+```
+
+## E; Calculating the test statistic for model-predicted (replicated) data sets
+
+First, we need 'replicated' data sets that are generated in each iteration
+of the sampler using current model estimates.
+
+So first, extract stored parameters for each iteration from the samples object:
+```{r}
+# Extract the parameter estimates
+theta.PE.chain1 <- results[[1]][,"theta.PE"]
+theta.PE.chain2 <- results[[2]][,"theta.PE"]
+theta.PC.chain1 <- results[[1]][,"theta.PC"]
+theta.PC.chain2 <- results[[2]][,"theta.PC"]
+
+```
+
+Now, we can use these estimate values to sample replicated datasets:
+
+```{r}
+library(LaplacesDemon)
+
+# Storage room (each row is a replicated dataset) :
+replicated.PE.chain1 <- array(data = NA, dim = c(length(theta.PE.chain1), dat$n.PE))
+replicated.PE.chain2 <- array(data = NA, dim = c(length(theta.PE.chain2), dat$n.PE))
+replicated.PC.chain1 <- array(data = NA, dim = c(length(theta.PC.chain1), dat$n.PC))
+replicated.PC.chain2 <- array(data = NA, dim = c(length(theta.PC.chain2), dat$n.PC))
+# Sample replicated datasets
+# For each parameter estimate...
+for(t in 1:length(theta.PE.chain1)) {
+# ... sample a replicated dataset by sampling n times from the Bernoulli distribution
+# with as probability of success on each trial the parameter estimate
+replicated.PE.chain1[t,] <- rbern(n = dat$n.PE, prob = theta.PE.chain1[t])
+replicated.PE.chain2[t,] <- rbern(n = dat$n.PE, prob = theta.PE.chain2[t])
+replicated.PC.chain1[t,] <- rbern(n = dat$n.PC, prob = theta.PC.chain1[t])
+replicated.PC.chain2[t,] <- rbern(n = dat$n.PC, prob = theta.PC.chain2[t])
+}
+```
+
+Finally, we have to write the statements that calculate the test-statistic
+on each of the replicated datasets so we can compare our 'fixed' test-statistic
+to these.
+
+```{r}
+test.statistics.PE <- rep(NA, ncol(replicated.PE.chain1) + ncol(replicated.PE.chain2))
+test.statistics.PC <- rep(NA, ncol(replicated.PC.chain1) + ncol(replicated.PC.chain2))
+
+## First, we calculate the statistics for the PE treatment
+for(i in 1:ncol(replicated.PE.chain1)){
+  half1 <- sum(replicated.PE.chain1[1:(nrow(replicated.PE.chain1)/2), i])/(nrow(replicated.PE.chain1)/2)
+  half2 <- sum(replicated.PE.chain1[(nrow(replicated.PE.chain1)/2 + 1):nrow(replicated.PE.chain1), i])/(nrow(replicated.PE.chain1)/2 + 1)
+  
+  test.statistics.PE[i] <- half1 - half2
+  
+}
+
+for(i in 1:ncol(replicated.PE.chain2)) {
+  half1 <- sum(replicated.PE.chain2[1:(nrow(replicated.PE.chain2)/2), i])/(nrow(replicated.PE.chain2)/2)
+  half2 <- sum(replicated.PE.chain2[(nrow(replicated.PE.chain2)/2 + 1):nrow(replicated.PE.chain2), i])/(nrow(replicated.PE.chain2)/2 + 1)
+  
+  test.statistics.PE[i + ncol(replicated.PE.chain1)] <- half1 - half2
+}
+
+## Then the statistic for the PC treatment
+for(i in 1:ncol(replicated.PC.chain1)){
+  half1 <- sum(replicated.PC.chain1[1:(nrow(replicated.PC.chain1)/2), i])/(nrow(replicated.PC.chain1)/2)
+  half2 <- sum(replicated.PC.chain1[(nrow(replicated.PC.chain1)/2 + 1):nrow(replicated.PC.chain1), i])/(nrow(replicated.PC.chain1)/2 + 1)
+  
+  test.statistics.PC[i] <- half1 - half2
+  
+}
+
+for(i in 1:ncol(replicated.PC.chain2)) {
+  half1 <- sum(replicated.PC.chain2[1:(nrow(replicated.PC.chain2)/2), i])/(nrow(replicated.PC.chain2)/2)
+  half2 <- sum(replicated.PC.chain2[(nrow(replicated.PC.chain2)/2 + 1):nrow(replicated.PC.chain2), i])/(nrow(replicated.PC.chain2)/2 + 1)
+  
+  test.statistics.PC[i + ncol(replicated.PC.chain1)] <- half1 - half2
+}
+
+test.statistics.PE
+test.statistics.PC
+```
+
+Now, we have a test statistic for every single replicated data set for both 
+treatments.
+
+## F: Adding code to obtain posterior predictie p-values for the two groups
+
+Considering that we are using a difference score as our test statistic, it can
+both be positive or negative. Hence, a two-sided test should be used in this
+case.
+
+Now, we should calculate the amount of times the *absolute* test statistic
+(absolute because we are testing two sided) of our replicated data sets is
+*larger* than our empirical test statistic.
+```{r}
+library(tidyverse)
+## For PC group:
+ifelse(abs(test.statistics.PC) > abs(diff.PC), 1, 0) %>% mean(.)
+
+## For PE group:
+ifelse(abs(test.statistics.PE) > abs(diff.PE), 1, 0) %>% mean(.)
+
+```
+
+## G: Interpreting the posterior predictive p-values
+
+Turns out, never are the test statistics for the replicated data sets larger
+than the one from our empirical data set. So for both groups *p < .001*.
+
+In other words, in the replicated data sets, using parameter values gained from
+our posterior distribution, the probability of finding a more extreme difference
+in recoveries in your first and second half is very small.
+
+This means that perhaps a binomial distribution might not fit the data very well
+and perhaps we should look into alternatives.
+
+Similarities and differences with classical hypothesis testing:
+A lot...
+
+
+
+
