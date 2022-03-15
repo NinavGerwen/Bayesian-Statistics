@@ -25,6 +25,15 @@ sigma1 <- 10000
 mu2 <- 1
 sigma2 <- 10000
 
+## For MH: we need a proposal and posterior distribution, however, since
+## it has to be a linear regression, this will always be a normal distribution
+## so we can use pnorm() for this, but the proposal distribution should be specified!
+
+## For example, for an exponential proposal distribution:
+proposal <- function(y) {
+  return(ifelse(y<0), 0, exp(y))
+}
+
 ## For the input of the Gibbs Sampler, one should provide: 
         ## a vector of continuous variables that serves as your dependent variable
         ## two vectors of continuous variables that serve as your independent variables
@@ -76,7 +85,15 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.
       
       ## If through MH:
       
-      ## First...
+      ## First, we gain a proposal value
+      proposal_value <- a.new.b0.from.proposal.distribution
+      
+      ## Calculate acceptance ratio
+      accept_ratio <- (pnorm(proposal_value)/pnorm(b0[i - 1])) * (proposal(b0[i - 1])/proposal(proposal_value))
+      
+      ## Then see whether we accept the proposed value
+      if(runif(1,0,1) < accept_ratio) {
+        b0[i] <- proposal_value } else { b0[i] <- b0[i = 1] }
     }
  
     ## Then, every loop, we will update the coefficient of the first independent variable
