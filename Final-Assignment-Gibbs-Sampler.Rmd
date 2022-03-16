@@ -69,7 +69,7 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.
     
     ## In every loop, We first update the intercept:
     ## Check whether the intercept should be sampled through Gibbs or MH
-    if(method[1] == 0) {
+    if(method[1] == "0") {
       
       ## If through Gibbs Sampler:
       
@@ -99,7 +99,7 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.
     ## Then, every loop, we will update the coefficient of the first independent variable
     
     ## Again, check whether Gibbs or MH:
-    if(method[2] == 0) {
+    if(method[2] == "0") {
     
       ## If through Gibbs:
       
@@ -120,7 +120,7 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.
     
     ## But first check whether Gibbs oR MH:
 
-    if(method[3] == 0) {
+    if(method[3] == "0") {
       
       ## If through Gibbs:
     
@@ -203,7 +203,7 @@ str(data)
 
 summary(lm(attitude ~ extraversion + agreeableness, data = data))
 
-GibbsSampler(data$attitude, data$extraversion, data$agreeableness, burn.in = 1000, iterations = 10000)
+GibbsSampler(data$attitude, data$extraversion, data$agreeableness, burn.in = 1000, iterations = 10000, initial.values = c(50, .05, .1))
 
 ```
 
@@ -221,5 +221,14 @@ autocorrelationplot <- function(X) {
 
 ```
 
+```{r}
+## Comparing results to JAGS results
+library(haven)
+testdat <- read_sav(file = "FEARadapted.sav")
+
+summary(lm(exam ~ fost + confid, data = testdat))
+
+GibbsSampler(testdat$exam, testdat$fost, testdat$confid, burn.in = 6000, iterations = 20000, initial.values = c(50, .01, .1))
+```
 
 

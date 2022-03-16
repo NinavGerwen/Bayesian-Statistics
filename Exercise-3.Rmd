@@ -166,9 +166,6 @@ for(i in 1:nrow(replicated.PC.chain2)) {
   
   test.statistics.PC[i + nrow(replicated.PC.chain1)] <- half1 - half2
 }
-
-test.statistics.PE
-test.statistics.PC
 ```
 
 Now, we have a test statistic for every single replicated data set for both 
