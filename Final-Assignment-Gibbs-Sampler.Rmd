@@ -89,7 +89,7 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.
       proposal_value <- a.new.b0.from.proposal.distribution
       
       ## Calculate acceptance ratio
-      accept_ratio <- (pnorm(proposal_value)/pnorm(b0[i - 1])) * (proposal(b0[i - 1])/proposal(proposal_value))
+      accept_ratio <- (dnorm(proposal_value)/dnorm(b0[i - 1])) * (proposal(b0[i - 1])/proposal(proposal_value))
       
       ## Then see whether we accept the proposed value
       if(runif(1,0,1) < accept_ratio) {
