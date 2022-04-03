@@ -12,6 +12,8 @@ y.PC ~ dbin(theta.PC, n.PC)
 theta.PE ~ dbeta(41,66)
 theta.PC ~ dbeta(46,86)
 
+## If you wanted to weight for 0.5, you'd multiple all the numbers by 0.5 in the dbeta arguments
+
 # contrast
 RR <- theta.PC/theta.PE
     
