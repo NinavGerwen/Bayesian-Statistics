@@ -27,12 +27,7 @@ sigma2 <- 10000
 
 ## For MH: we need a proposal and posterior distribution, however, since
 ## it has to be a linear regression, this will always be a normal distribution
-## so we can use pnorm() for this, but the proposal distribution should be specified!
-
-## For example, for an exponential proposal distribution:
-proposal <- function(y) {
-  return(ifelse(y<0), 0, exp(y))
-}
+## so we can use dnorm() for this, but the proposal distribution should be specified!
 
 ## For the input of the Gibbs Sampler, one should provide: 
         ## a vector of continuous variables that serves as your dependent variable
@@ -86,10 +81,10 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.
       ## If through MH:
       
       ## First, we gain a proposal value
-      proposal_value <- a.new.b0.from.proposal.distribution
+      proposal_value <- rt(...)
       
       ## Calculate acceptance ratio
-      accept_ratio <- (dnorm(proposal_value)/dnorm(b0[i - 1])) * (proposal(b0[i - 1])/proposal(proposal_value))
+      accept_ratio <- (dnorm(proposal_value)/dnorm(b0[i - 1])) * (dt(b0[i - 1])/dt(proposal_value))
       
       ## Then see whether we accept the proposed value
       if(runif(1,0,1) < accept_ratio) {
@@ -216,10 +211,21 @@ all randomly sampled values for a parameter, will return an autocorrelation plot
 
 ```{r Autocor plot}
 
-autocorrelationplot <- function(X) {
-  
+autocorrelationplot <- function(V, lag = 50) {
+  autocors <- rep(NA, lag)
+  for(i in 1:lag) {
+    V1 <- c(V, rep(0, i))
+    V2 <- c(rep(0, i), V)
+    matrix <- cbind(V1, V2)
+    matrix <- head(matrix, -i)
+    matrix <- tail(matrix, -i)
+    autocors[i] <- cor(matrix[, 1], matrix[, 2])[1]
+  }
+  plot(1:lag, autocors)
+  return(autocors)
 }
 
+autocorrelationplot(V = df$b2)
 ```
 
 ```{r}
@@ -246,5 +252,29 @@ mean(df$b2)
 mean(testdat$IQ)
 var(testdat$IQ)
 ```
+
+Guidelines voor proposal distribution:
+
+niet te breed niet te small... Je kan LM gebruiken om dan de estimate als mean te gebruiken en de standard error te gebruiken als variantie van proposal. (perhaps extra uncertainty toevoegen)
+
+Voor hypothese testen: 
+
+je kan regressie coefficient gebruiken 
+(bv. H1: b1 > b2 // H2: b2 < b1 - hier moet je voor echter ze standardizeren)
+(bv. H1: b1 > 0 // H2: b2 > 0, H3: b1 & b2 > 0) - ofwel zelf programmeren (met behulp van multivariate normal distribution - posterior en prior) ofwel lm en dan bain
+
+je kan ook meerdere modellen gebruiken: bv een model met 2 predictors, een model met 2 predictors + 1 interactie, etc.
+
+Assessing convergence:
+
+multiple ways, so not just a traceplot (i.e., create autocorrelation plot function)
+
+voor autocorrelation plot:
+
+for-loop t van 1:50
+voor elke keer, heb twee vectors van een regressie coefficent,
+dan schuif je een vector t plaatsen omhoog (en wellicht n - t'de element
+verwijderen OF cor(..., use = 'pairwise.complete.obs')) en dan correlatie calculaten.
+
 
 
