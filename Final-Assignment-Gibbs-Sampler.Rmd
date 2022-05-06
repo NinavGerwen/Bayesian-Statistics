@@ -276,5 +276,13 @@ voor elke keer, heb twee vectors van een regressie coefficent,
 dan schuif je een vector t plaatsen omhoog (en wellicht n - t'de element
 verwijderen OF cor(..., use = 'pairwise.complete.obs')) en dan correlatie calculaten.
 
+Voor eindopdracht:
 
+To convert Rmarkdown to Rfile:
 
+In Rstudio run: knitr::purl.("Mymarkdownfile.Rmd")  
+
+It will create an R file "Mymarkdownfile.R" in your working directory which contains only Rcode. You may want to trim out some markdown junk code that is not needed afterwards. You can also build in that you also produce an R code file  as you knit (see first linkt below).
+
+More info here:
+https://bookdown.org/yihui/rmarkdown-cookbook/purl.html
