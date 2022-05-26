@@ -1,0 +1,102 @@
+---
+title: "Final Assignment - Bayesian Statistics"
+author: "Nina van Gerwen (1860852)"
+date: "15/06/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+### Description of the data
+
+```{r include=FALSE}
+library(haven)
+testdat <- read_sav(file = "Week6Data2.sav")
+
+testdat <- testdat[, 2:4]
+
+testdat$verbal <- testdat$verbal - mean(testdat$verbal)
+```
+
+For my dataset, I chose one gained from Multivariate Statistics. The dataset 
+contains a total of three variables from 400 high school students and contains
+no missing data. The variables are Verbal Ability, which ranges from 2.26 to 4
+(*M* = 3.39, *SD* = 0.38), self-reported Social Economical Status (SES) on a
+scale from 0 to 60 (*M* = 32.78, *SD* = 9.66) and Intelligence Quotient (IQ),
+which ranged from 85.5 to 143 (*M* = 118.2, *SD* = 11.92). When visually 
+inspecting the histograms of the variables, we find that SES and IQ seem to follow
+a normal distribution. Verbal Ability, however, seems to be slightly skewed to the
+left which could be explained by a ceiling effect.
+
+### Research Questions
+
+With this dataset, we will aim to research whether IQ can be predicted by both
+SES and IQ. To answer this research question, we have come up with a total of
+three hypotheses.
+
+Hypotheses:
+- IQ in students is predicted by their Verbal Ability, while statistically
+controlling for SES, where people with a higher Verbal Ability will have 
+higher IQ scores.
+
+- IQ in students is predicted by their self-reported SES, whiel statistically
+controllign for Verbal Ability, where people with a higher self-reported SES
+will have higher IQ scores.
+
+- The effect of Verbal Ability on IQ depends on self-reported SES, where people 
+who have a higher self-reported SES will have a greater effect of Verbal Ability 
+on IQ than people with lower self-reported SES scores.
+
+## Method
+
+### Prior distributions
+
+IQ: known to be a variable that has a mean of 100, sd of 15.
+
+### Statistical Analyses
+
+To answer our research questions and hypotheses, we will run a total of four
+analyses.
+
+First two analyses: uninformative priors, regression coefficients estimated
+through both a Gibbs Sampler and independent MH Sampler
+
+Last two analyses: informative priors, regression coefficients estimated
+through both a Gibbs Sampler and independent MH Sampler.
+
+### Model Diagnostics
+
+First, we will try to assess whether the different methods of sampling gave  
+different results through visual inspection. If they do not differ,
+we will only continue with the results gained from a Gibbs Sampler (reasons).
+
+Second, we will assess convergence of the Gibbs Sampler through visual inspection
+of both traceplots and autocorrelation plots.
+
+Finally, we will assess whether the residuals of our model are normally
+distributed through the posterior predictive *p*-value. For this, we will use
+the following test statistic:
+
+$$ T = (\mu - m_1)^2+(\mu - m_2)^2$$
+where $\mu$ is the mean, $m_1$ is the median and $m_2$ is the mode of the posterior distribution.
+(reasons why this gives proof)
+
+### Model comparison
+
+Besides answering the hypotheses, we also want to see which hypothesis has the
+most support. To do this, we will compare the hypotheses (and their corresponding
+statistical models) through the use of the Bayes factor. When comparing the
+hypotheses, we will make use of the prior distributions earlier specified.
+
+## Results
+
+### Parameter estimates
+
+Here go the parameter estimates, credible intervals and interpretation
+
+### Model comparison
+

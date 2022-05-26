@@ -42,7 +42,8 @@ sigma2 <- 10000
           ## for the regression coefficient you want to change
               ## Examples: 
                 ## method = c(0, 1, 0) will make it so that b1 is done through MH
-GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.values = c(1, 1, 1), method = c("0", "0", "0")) {
+GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, 
+                         initial.values = c(1, 1, 1), method = c("0", "0", "0")) {
   ## First, the function should require ggplot2 as it is used to create traceplots later
   library(ggplot2)
   ## First create space
@@ -70,7 +71,8 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.
       
       ## First, we update the parameters of the intercept (mean and standard deviation) with the following formula:
     
-      mean.0.post <- (sum(Y - (b1[i - 1]*X1 - b2[i - 1]*X2), na.rm = TRUE)/vari[i - 1] + (mu0 / sigma0)) / ((N / vari[i - 1]) + (1 / sigma0))
+      mean.0.post <- (sum(Y - (b1[i - 1]*X1 - b2[i - 1]*X2), na.rm = TRUE)/vari[i - 1] + 
+                        (mu0 / sigma0)) / ((N / vari[i - 1]) + (1 / sigma0))
       sd.0.post <- 1 / ((N / vari[i - 1]) + (1 / sigma0))
 
       ## Then through rnorm we randomly sample from a normal distribution the next value for b0 with the
@@ -79,16 +81,14 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.
     } else {
       
       ## If through MH:
-      
       ## First, we gain a proposal value
-      proposal_value <- rt(...)
-      
+      proposal_value <- 115.45 * rt(1, df = 1)
       ## Calculate acceptance ratio
-      accept_ratio <- (dnorm(proposal_value)/dnorm(b0[i - 1])) * (dt(b0[i - 1])/dt(proposal_value))
-      
+      accept_ratio <- (dnorm(proposal_value, mean = 115.45, sd = 19.96)/dnorm(b0[i - 1], mean = 115.45, sd = 19.96)) * 
+        (dt(b0[i - 1], df = 1)/dt(proposal_value, df = 1))
       ## Then see whether we accept the proposed value
       if(runif(1,0,1) < accept_ratio) {
-        b0[i] <- proposal_value } else { b0[i] <- b0[i = 1] }
+        b0[i] <- proposal_value } else { b0[i] <- b0[i - 1] }
     }
  
     ## Then, every loop, we will update the coefficient of the first independent variable
@@ -100,7 +100,8 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.
       
       ## We can update the mean and standard deviation of the regression coefficient for the first variable
       ## using the updated value of the intercept
-      mean.1.post <- ((sum(X1*(Y - b0[i] - b2[i - 1]*X2), na.rm = TRUE)/vari[i - 1]) + (mu1 / sigma1)) / ((sum((X1^2), na.rm = TRUE)/vari[i - 1]) + (1 / sigma1))
+      mean.1.post <- ((sum(X1*(Y - b0[i] - b2[i - 1]*X2), na.rm = TRUE)/vari[i - 1]) + 
+                        (mu1 / sigma1)) / ((sum((X1^2), na.rm = TRUE)/vari[i - 1]) + (1 / sigma1))
       sd.1.post <- 1/((sum((X1^2), na.rm = TRUE) / vari[i - 1]) + (1 / sigma1))
     
       ## Then again we randomly sample a new b1 through rnorm
@@ -108,8 +109,14 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.
       
     } else {
       ## If through MH:
-      
-      ## First... 
+      ## First, we gain a proposal value
+      proposal_value <- 11.73 * rt(1, df = 1)
+      ## Calculate acceptance ratio
+      accept_ratio <- (dnorm(proposal_value, mean = 11.73, sd = 1.46)/dnorm(b1[i - 1], mean = 11.73, sd = 1.46)) * 
+        (dt(b1[i - 1], df = 1)/dt(proposal_value, df = 1))
+      ## Then see whether we accept the proposed value
+      if(runif(1,0,1) < accept_ratio) {
+        b1[i] <- proposal_value } else { b1[i] <- b1[i - 1] }
     }
     
     ## Then, every loop, we update the regression coefficient of the second variable
@@ -122,15 +129,22 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000, initial.
     
       ## We update the mean and standard deviation of the regression coefficient for the second variable
       ## using the updated value of both the intercept and b1
-      mean.2.post <- (sum(X2*(Y - b0[i] - b1[i]*X1), na.rm = TRUE)/vari[i - 1] + (mu2 / sigma2)) / ((sum(X2^2, na.rm = TRUE)/vari[i - 1]) + (1 / sigma2))
+      mean.2.post <- (sum(X2*(Y - b0[i] - b1[i]*X1), na.rm = TRUE)/vari[i - 1] + 
+                        (mu2 / sigma2)) / ((sum(X2^2, na.rm = TRUE)/vari[i - 1]) + (1 / sigma2))
       sd.2.post <- 1/((sum(X2^2, na.rm = TRUE) / vari[i - 1]) + (1 / sigma2))
    
       ## Then, we randomly sample a new b2
       b2[i] <- rnorm(n = 1, mean = mean.2.post, sd = sqrt(sd.2.post))
     } else {
       ## If through MH:
-      
-      ## ...
+      ## First, we gain a proposal value
+      proposal_value <- 0.08 * rt(1, df = 1)
+      ## Calculate acceptance ratio
+      accept_ratio <- (dnorm(proposal_value, mean = 0.08, sd = 0.06)/dnorm(b2[i - 1], mean = 0.08, sd = 0.06)) * 
+        (dt(b2[i - 1], df = 1)/dt(proposal_value, df = 1))
+      ## Then see whether we accept the proposed value
+      if(runif(1,0,1) < accept_ratio) {
+        b2[i] <- proposal_value } else { b2[i] <- b2[i - 1] }
     }
     
     ## Finally, we update the parameters for the distribution of our variance using all above updated values
@@ -286,3 +300,98 @@ It will create an R file "Mymarkdownfile.R" in your working directory which cont
 
 More info here:
 https://bookdown.org/yihui/rmarkdown-cookbook/purl.html
+
+```{r}
+set.seed(3)
+GibbsSampler(testdat$IQ, testdat$verbal, testdat$SES, burn.in = 5000, iterations = 25000, initial.values = c(1, 1, 1), method = c("0", "0", "1"))
+
+set.seed(3)
+GibbsSampler(testdat$IQ, testdat$verbal, testdat$SES, burn.in = 5000, iterations = 25000, initial.values = c(1, 1, 1), method = c("0", "1", "0"))
+
+set.seed(3)
+GibbsSampler(testdat$IQ, testdat$verbal, testdat$SES, burn.in = 5000, iterations = 25000, initial.values = c(1, 1, 1), method = c("1", "1", "1"))
+```
+
+
+POSTERIOR PREDICTIVE P-VALUE
+
+```{r}
+set.seed(3)
+
+sim.data <- matrix(data = NA, nrow = 400, ncol = 1000)
+
+b0_t <- rep(NA, 1000)
+b1_t <- rep(NA, 1000)
+b2_t <- rep(NA, 1000)
+s2_t <- rep(NA, 1000)
+
+for(i in 1:1000) {
+  b0_t[i] <- sample(df$b0, 1)
+  b1_t[i] <- sample(df$b1, 1)
+  b2_t[i] <- sample(df$b2, 1)
+  s2_t[i] <- sample(df$vari, 1)
+  
+  sim.data[, i] <- rnorm(400, mean = b0_t[i] + b1_t[i]*testdat$verbal + b2_t[i]*testdat$SES, sd = sqrt(s2_t[1]))
+}
+
+## Now discrepancy measure
+residuals_sim <- matrix(data = NA, nrow = 400, ncol = 1000)
+
+for(i in 1:1000) {
+  residuals_sim[, i] <- sim.data[, i] - b0_t[i] - b1_t[i]*testdat$verbal - b2_t[i]*testdat$SES
+}
+
+residuals_obs <- matrix(data = NA, nrow = 400, ncol = 1000)
+
+for(i in 1:1000){
+  residuals_obs[, i] <- testdat$IQ - b0_t[i] - b1_t[i]*testdat$verbal - b2_t[i]*testdat$SES
+}
+
+sim_skewness <- rep(NA, 1000)
+
+for(i in 1:1000) {
+  sim_skewness[i] <- (mean(residuals_sim[, i] - median(residuals_sim[, i])))^2
+}
+
+obs_skewness <- rep(NA, 1000)
+
+for(i in 1:1000) {
+  obs_skewness[i] <- (mean(residuals_obs[, i] - median(residuals_obs[, i])))^2
+}
+
+p_value <- sum(sim_skewness > obs_skewness)/400
+p_value
+```
+This means that 61.5% of the time, the mean - median squared of the residuals in a simulated dataset are larger than in the observed dataset. in other words, 61.5% of the time, the residuals in a simulated dataset follow a less normally distributed distribution?
+
+## Bayes Factor
+
+```{r}
+library(MASS)
+
+test <- lm(IQ ~ verbal + SES, data = testdat)
+
+## Posterior:
+
+set.seed(3)
+
+means <- test$coefficients[2:3]
+sigma <- vcov(test)[2:3, 2:3]
+
+post <- mvrnorm(100000, mu = means, Sigma = sigma)
+
+sum(post[, 2] > 0)/100000
+
+b <- 5/400
+
+prior <- mvrnorm(100000, mu = c(0, 0), Sigma = sigma/b)
+
+sum(prior[, 2] > 0)/100000
+
+BayesFactor <- function(){}
+
+
+
+```
+
+
