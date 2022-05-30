@@ -68,12 +68,12 @@ For our dataset, we chose one gained from Multivariate Statistics. The dataset
 contains a total of three variables from 400 high school students and contains
 no missing data. The variables are Verbal Ability, which ranges from 2.26 to 4
 (*M* = 3.39, *SD* = 0.38), self-reported SES on a scale from 0 to 60 
-(*M* = 32.78, *SD* = 9.66) and IQ,
-which ranged from 85.5 to 143 (*M* = 118.2, *SD* = 11.92). When visually 
+(*M* = 32.78, *SD* = 9.66) and IQ, which ranged from 85.5 to 143 (*M* = 118.2, *SD* = 11.92). 
+When visually 
 inspecting the histograms of the variables, we find that SES and IQ seem to follow
 a normal distribution. Verbal Ability, however, seems to be slightly skewed to the
-left which could be explained by a ceiling effect. Furthermore, for all
-analyses, we grand mean centered the variable of Verbal Ability in order
+left which could be explained by a ceiling effect. For all analyses, 
+we grand mean centered the variable of Verbal Ability in order
 to aid convergence and interpretation. 
 
 ### Statistical Analyses
@@ -98,39 +98,38 @@ intercept??
 ### Model Diagnostics
 
 First, we will assess the convergence of all analyses through visual inspection
-of both traceplots and autocorrelation plots. Because the analyses consist of
-only one chain, we can not use the Gelman-Rubin statistic.
+of both traceplots and autocorrelation plots. (Because the analyses consist of
+only one chain, we can not use the Gelman-Rubin statistic. Furthermore, the MC
+error is based on a test and visual tests are preferred)
 
 Second, we will assess whether the different methods of sampling gave  
 different results. If they do not seem to differ, we will try to choose
-the best model to continue with. 
+the best model to continue with.
 
 -- other things to say perhaps
 only continue 
 with the results gained from Gibbs Samplers 
 with informative priors. (reasons)
 
-Finally, we will assess whether the residuals of our model are normally
+Finally, for the chosen model, we will assess whether the residuals of our model are normally
 distributed through use of the posterior predictive *p*-value and discrepancy measures
 with the following original test statistic: 
 
 $$ T = (\mu - m_1)^2$$
-where $\mu$ is the mean and $m_1$ is the median of the distribution of the residuals.
-(reasons why this gives proof).
-
+where $\mu$ is the mean and $m_1$ is the median of the distribution of the residuals. 
 The reasoning behind the statistic is that the more skewed a distribution is, the 
 larger the difference between the mean and median will be. However, this difference
 can be either negative (in a left-skewed distribution) or positive (in a right-skewed distribution). 
 Hence, we square the difference in order to always gain a positive value. Now, the larger
-the statistic is, the larger the absolute difference between mean and median and
-the more skewed a distribution is. 
+the statistic is, the larger the absolute difference between mean and median, and
+the more skewed a distribution supposedly is. 
 
-To investigate whether the original statistic works, we will compare the results 
-to the known statistic of skewness:
+To investigate whether our original statistic works, we will compare the results 
+to a posterior predictive *p*-value with the known statistic of skewness:
 
 $$ \tilde{\mu}_3 = \frac{\Sigma_i^N(X_i - \bar{X})^3}{(N - 1) \cdot \sigma^3} $$
 where $\bar{X}$ is the mean of the residuals and $\sigma$ the standard deviation
-of the residuals. Skewness is known to measure asymmetry of a distribution. Therefore, we will use it 
+of the residuals. Skewness is known to measure the asymmetry of a distribution. Therefore, we will use it 
 to see whether the results are similar to the results of our original test statistic.
 
 ### Model comparison
@@ -619,6 +618,7 @@ BF.H2 <- (sum(posterior[, 1] > 0 & posterior[, 2] < .1 & posterior[, 2] > -.1)/1
 BF.H3 <- (sum(posterior[, 2] > 0 & posterior[, 1] < .1 & posterior[, 1] > -.1)/100000) / 
   (sum(prior[, 2] > 0 & prior[, 1] < .1 & prior[, 1] > -.1)/100000)
 ```
+
 
 
 ## Discussion
