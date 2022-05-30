@@ -325,13 +325,14 @@ b1_t <- rep(NA, 1000)
 b2_t <- rep(NA, 1000)
 s2_t <- rep(NA, 1000)
 
+## Generate data
 for(i in 1:1000) {
   b0_t[i] <- sample(df$b0, 1)
   b1_t[i] <- sample(df$b1, 1)
   b2_t[i] <- sample(df$b2, 1)
   s2_t[i] <- sample(df$vari, 1)
   
-  sim.data[, i] <- rnorm(400, mean = b0_t[i] + b1_t[i]*testdat$verbal + b2_t[i]*testdat$SES, sd = sqrt(s2_t[1]))
+  sim.data[, i] <- rnorm(400, mean = b0_t[i] + b1_t[i]*testdat$verbal + b2_t[i]*testdat$SES, sd = sqrt(s2_t[i]))
 }
 
 ## Now discrepancy measure
@@ -349,20 +350,35 @@ for(i in 1:1000){
 
 sim_skewness <- rep(NA, 1000)
 
+## mean - median
 for(i in 1:1000) {
-  sim_skewness[i] <- (mean(residuals_sim[, i] - median(residuals_sim[, i])))^2
+  sim_skewness[i] <- (mean(residuals_sim[, i]) - median(residuals_sim[, i]))^2
 }
 
 obs_skewness <- rep(NA, 1000)
 
 for(i in 1:1000) {
-  obs_skewness[i] <- (mean(residuals_obs[, i] - median(residuals_obs[, i])))^2
+  obs_skewness[i] <- (mean(residuals_obs[, i])- median(residuals_obs[, i]))^2
 }
 
-p_value <- sum(sim_skewness > obs_skewness)/400
+p_value <- sum(sim_skewness > obs_skewness)/1000
 p_value
+
+library(moments)
+
+obs_skew <- rep(NA, 1000)
+sim_skew <- rep(NA, 1000)
+
+for(i in 1:1000) {
+  obs_skew[i] <- skewness(residuals_obs[, i])
+  sim_skew[i] <- skewness(residuals_sim[, i])
+}
+
+second_p <- sum(sim_skew > obs_skew)/1000
+second_p
+
 ```
-This means that 61.5% of the time, the mean - median squared of the residuals in a simulated dataset are larger than in the observed dataset. in other words, 61.5% of the time, the residuals in a simulated dataset follow a less normally distributed distribution?
+This means that 24.7% of the time, the mean - median squared of the residuals in a simulated dataset are larger than in the observed dataset. in other words, 24.7% of the time, the residuals in a simulated dataset follow a less normally distributed distribution?
 
 ## Bayes Factor
 
@@ -370,6 +386,8 @@ This means that 61.5% of the time, the mean - median squared of the residuals in
 library(MASS)
 
 test <- lm(IQ ~ verbal + SES, data = testdat)
+
+test2 <- lm(IQ ~ verbal + SES + verbal*SES, data = testdat)
 
 ## Posterior:
 
@@ -380,18 +398,28 @@ sigma <- vcov(test)[2:3, 2:3]
 
 post <- mvrnorm(100000, mu = means, Sigma = sigma)
 
-sum(post[, 2] > 0)/100000
-
-b <- 5/400
+b <- 6/400
 
 prior <- mvrnorm(100000, mu = c(0, 0), Sigma = sigma/b)
 
-sum(prior[, 2] > 0)/100000
 
-BayesFactor <- function(){}
+BF_H1 <- (sum(post[, 1] > 0)/100000) / (sum(prior[, 1] > 0)/100000)
 
+BF_H2 <- (sum(post[, 2] > 0)/100000) / (sum(prior[, 2] > 0)/100000)
+
+BFH12 <- BF_H1 / BF_H2
+
+(sum(post[, 1] > 0 & post[, 2] < .1 & post[, 2] > -.1)/100000) / (sum(prior[, 1] > 0 & prior[, 2] < .1 & prior[, 2] > -.1)/100000)
+
+(sum(post[, 2] > 0 & post[, 1] < .1 & post[, 1] > -.1)/100000) / (sum(prior[, 2] > 0 & prior[, 1] < .1 & prior[, 1] > -.1)/100000)
 
 
 ```
 
 
+VRAGEN MORGEN:
+
+- kan je h0: b1 > 0, b2 unconstrained doen?
+- sensitivity analysis
+- waarom positieve covariance in bayesian, negatieve in lm?
+- moet je voor elke bayes factor calculatie opnieuw samplen?
