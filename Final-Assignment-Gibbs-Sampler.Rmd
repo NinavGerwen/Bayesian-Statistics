@@ -82,7 +82,7 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000,
       
       ## If through MH:
       ## First, we gain a proposal value
-      proposal_value <- 115.45 * rt(1, df = 1)
+      proposal_value <- 115.45 * rt(1, df = 1) ## MOET EEN PLUS ZIJN IPV KEER
       ## Calculate acceptance ratio
       accept_ratio <- (dnorm(proposal_value, mean = 115.45, sd = 19.96)/dnorm(b0[i - 1], mean = 115.45, sd = 19.96)) * 
         (dt(b0[i - 1], df = 1)/dt(proposal_value, df = 1))
