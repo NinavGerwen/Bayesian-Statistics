@@ -348,8 +348,9 @@ mu2 <- 1
 sigma2 <- 10000
 
 ## Then run the GibbsSampler function with our data
-Analysis.1<- GibbsSampler(dat$IQ, dat$verbal, dat$SES, burn.in = 5000, 
-                            iterations = 25000, initial.values = c(1, 1, 1))
+set.seed(3)
+Analysis.1<- GibbsSampler(dat$IQ, dat$verbal, dat$SES, burn.in = 2500, 
+                            iterations = 12500, initial.values = c(1, 1, 1))
 
 ## Analysis 2: Informative prior + Gibbs ---------------------------------------
 
@@ -494,7 +495,6 @@ autocorrelationplot(V = LR3.dataframe$vari)
 ```{r PP P-values, include=FALSE}
 ## First, we set a seed for reproducibility
 set.seed(3)
-
 ## Then, we create an empty matrix with equal rows to our original dataset
 ## and as many columns as we would like datasets
 sim.data <- matrix(data = NA, nrow = 400, ncol = 1000)
@@ -509,15 +509,15 @@ s2_t <- rep(NA, 1000)
 ## Now, we can start the data simulation through a for loop
 for(i in 1:1000) {
   ## In every loop, we sample one value from all our regression coefficients
-  b0_t[i] <- sample(LRX.dataframe$b0, 1)
-  b1_t[i] <- sample(LRX.dataframe$b1, 1)
-  b2_t[i] <- sample(LRX.dataframe$b2, 1)
-  s2_t[i] <- sample(LRX.dataframe$vari, 1)
+  b0_t[i] <- sample(LR1.dataframe$b0, 1)
+  b1_t[i] <- sample(LR1.dataframe$b1, 1)
+  b2_t[i] <- sample(LR1.dataframe$b2, 1)
+  s2_t[i] <- sample(LR1.dataframe$vari, 1)
 
   ## Then, we create a column of simulated Y values that use the sampled
   ## regression coefficients through rnorm, where the mean is their 
   ## expected value and the sd is the sampled variance
-  sim.data[, i] <- rnorm(400, mean = b0_t[i] + b1_t[i]*testdat$verbal + b2_t[i]*testdat$SES, sd = sqrt(s2_t[i]))
+  sim.data[, i] <- rnorm(400, mean = b0_t[i] + b1_t[i]*dat$verbal + b2_t[i]*dat$SES, sd = sqrt(s2_t[i]))
 }
 
 ## Now, as a discrepancy measure, we calculate the residuals for every
@@ -525,7 +525,7 @@ for(i in 1:1000) {
 residuals_sim <- matrix(data = NA, nrow = 400, ncol = 1000)
 
 for(i in 1:1000) {
-  residuals_sim[, i] <- sim.data[, i] - b0_t[i] - b1_t[i]*testdat$verbal - b2_t[i]*testdat$SES
+  residuals_sim[, i] <- sim.data[, i] - b0_t[i] - b1_t[i]*dat$verbal - b2_t[i]*dat$SES
 }
 
 ## For the observed dataset, we also calculate the residuals a 1000 times
@@ -533,7 +533,7 @@ for(i in 1:1000) {
 residuals_obs <- matrix(data = NA, nrow = 400, ncol = 1000)
 
 for(i in 1:1000){
-  residuals_obs[, i] <- testdat$IQ - b0_t[i] - b1_t[i]*testdat$verbal - b2_t[i]*testdat$SES
+  residuals_obs[, i] <- dat$IQ - b0_t[i] - b1_t[i]*dat$verbal - b2_t[i]*dat$SES
 }
 
 ## ORIGINAL TEST STATISTIC -----------------------------------------------------
@@ -548,7 +548,7 @@ for(i in 1:1000) {
 obs_skewness <- rep(NA, 1000)
 
 for(i in 1:1000) {
-  obs_skewness[i] <- (mean(residuals_obs[, i])- median(residuals_obs[, i]))^2
+  obs_skewness[i] <- (mean(residuals_obs[, i]) - median(residuals_obs[, i]))^2
 }
 
 ## And we calculate the Posterior Predictive P-value by finding the proportion
@@ -574,8 +574,8 @@ for(i in 1:1000) {
 ## And again, we calculate the posterior predictive p-value by finding the
 ## proportion of times that the skewness for simulated residuals is larger
 ## than the skewness in the observed residuals
-second_ppp <- sum(sim_skew > obs_skew)/1000
-second_ppp
+comparison_ppp <- sum(sim_skew > obs_skew)/1000
+comparison_ppp
 ```
 
 ### Model comparison

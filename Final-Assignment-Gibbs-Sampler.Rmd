@@ -254,6 +254,7 @@ summary(lm(IQ ~ verbal + SES, data = testdat))
 
 set.seed(3)
 GibbsSampler(testdat$IQ, testdat$verbal, testdat$SES, burn.in = 5000, iterations = 25000, initial.values = c(1, 1, 1), method = c("0", "0", "0"))
+set.seed(3)
 list <- GibbsSampler(testdat$IQ, testdat$verbal, testdat$pass, burn.in = 2500, iterations = 12500, initial.values = c(1, 1, 1))
 
 
