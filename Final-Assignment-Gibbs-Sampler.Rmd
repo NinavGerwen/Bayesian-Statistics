@@ -82,7 +82,7 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000,
       
       ## If through MH:
       ## First, we gain a proposal value
-      proposal_value <- 115.45 * rt(1, df = 1) ## MOET EEN PLUS ZIJN IPV KEER
+      proposal_value <- 115.45920 + 1.95990 * rt(1, df = 1) ## MOET EEN PLUS ZIJN IPV KEER
       ## Calculate acceptance ratio
       accept_ratio <- (dnorm(proposal_value, mean = 115.45, sd = 19.96)/dnorm(b0[i - 1], mean = 115.45, sd = 19.96)) * 
         (dt(b0[i - 1], df = 1)/dt(proposal_value, df = 1))
@@ -110,7 +110,7 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000,
     } else {
       ## If through MH:
       ## First, we gain a proposal value
-      proposal_value <- 11.73 * rt(1, df = 1)
+      proposal_value <- 11.73647 + 1.45593 * rt(1, df = 1)
       ## Calculate acceptance ratio
       accept_ratio <- (dnorm(proposal_value, mean = 11.73, sd = 1.46)/dnorm(b1[i - 1], mean = 11.73, sd = 1.46)) * 
         (dt(b1[i - 1], df = 1)/dt(proposal_value, df = 1))
@@ -138,7 +138,7 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000,
     } else {
       ## If through MH:
       ## First, we gain a proposal value
-      proposal_value <- 0.08 * rt(1, df = 1)
+      proposal_value <- 0.08399 + 0.05738 * rt(1, df = 1)
       ## Calculate acceptance ratio
       accept_ratio <- (dnorm(proposal_value, mean = 0.08, sd = 0.06)/dnorm(b2[i - 1], mean = 0.08, sd = 0.06)) * 
         (dt(b2[i - 1], df = 1)/dt(proposal_value, df = 1))
@@ -202,18 +202,6 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000,
   ## And finally, we ask the function to return this list of output
   return(list_of_output)
 }
-
-```
-
-```{r}
-## Testing the sampler
-library(haven)
-data <- read_sav("Exercise 2 - Data.sav")
-str(data)
-
-summary(lm(attitude ~ extraversion + agreeableness, data = data))
-
-GibbsSampler(data$attitude, data$extraversion, data$agreeableness, burn.in = 1000, iterations = 10000, initial.values = c(50, .05, .1))
 
 ```
 
@@ -424,3 +412,34 @@ VRAGEN MORGEN:
 - sensitivity analysis
 - waarom positieve covariance in bayesian, negatieve in lm?
 - moet je voor elke bayes factor calculatie opnieuw samplen?
+
+```{r}
+
+BFH2_values <- rep(NA, 50)
+
+set.seed(3)
+
+posterior <- mvrnorm(100000, mu = Means, Sigma = Sigma)
+
+for(i in 1:50) {
+  b <- as.numeric(i) / 400
+  prior <- mvrnorm(100000, mu = c(0, 0), Sigma = Sigma/as.numeric(b))
+  BFH2_values[i] <- (sum(posterior[, 1] > 0 & posterior[, 2] < .1 & posterior[, 2] > -.1)/100000) / 
+  (sum(prior[, 1] > 0 & prior[, 2] < .1 & prior[, 2] > -.1)/100000)
+  
+}
+
+plot(x = 1:50, y = BFH2_values)
+
+BFH1_values <- rep(NA,50)
+
+for(i in 1:50) {
+  b <- as.numeric(i) / 400
+  prior <- mvrnorm(100000, mu = c(0, 0), Sigma = Sigma/as.numeric(b))
+  BFH1_values[i] <- (sum(posterior[, 1] > 0 & posterior[, 2] > 0)/100000) /
+  (sum(prior[, 1] > 0 & prior[, 2] > 0)/100000)
+}
+
+plot(x = 1:50, y = BFH1_values, ylim = c(0, 5))
+```
+

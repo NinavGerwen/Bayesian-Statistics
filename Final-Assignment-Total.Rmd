@@ -15,7 +15,7 @@ Bayesian Statistics is a field of statistics that is based on another
 interpretation of probabilities. In Bayesian Statistics, a probability can be
 viewed as a quantification of personal belief in an event (source). In the current 
 paper, we will investigate the predictive ability of Social Economical Status (SES) and
-Verbal Ability (VA) on intelligence as measured by the Intelligence Quotient (IQ) through
+Verbal Ability on intelligence as measured by the Intelligence Quotient (IQ) through
 Bayesian methods and statistics. 
 
 
@@ -31,34 +31,25 @@ dat$verbal <- dat$verbal - mean(dat$verbal)
 
 ### Research Questions
 
-In this paper, we will aim to research whether IQ can be predicted by both
-SES and VA. To answer this research question, we have come up with a total of
-three hypotheses.
+In this paper, we will aim to research whether IQ can be predicted by SES and Verbal Ability. 
+To answer this research question, we have come up with a total of
+three hypotheses.      
 
-Hypotheses:
 - IQ in students is predicted by both their Verbal Ability, while statistically
 controlling for SES, and their SES, while controlling for their Verbal Ability, 
-where people with a higher Verbal Ability or SES will have higher IQ scores.
+where people with a higher Verbal Ability or higher SES are predicted to have higher IQ scores.
 
-$$ H_1 : \beta_1 > 0, \beta_2 > 0$$
-
+$$ H_1 : \beta_1 > 0, \beta_2 > 0 $$
 - IQ in students is predicted only by their Verbal Ability, while statistically
 controlling for SES, where people with a higher Verbal Ability
-will have higher IQ scores.
-
+are predicted to have higher IQ scores.
 $$ H_2: \beta_1 > 0, \beta_2 \approx 0 $$
 - IQ in students is predicted only by their SES, while statistically controlling
-for Verbal Ability, where people with a higher self-reported SES will have
-higher predicted IQ scores.
-
+for Verbal Ability, where people with a higher self-reported SES are predicted to have
+higher IQ scores.
 $$ H_3: \beta_1 \approx 0, \beta_2 > 0 $$
 
-OPTIONAL INTERACTION EFFECT
-- The effect of Verbal Ability on IQ depends on self-reported SES, where people 
-who have a higher self-reported SES will have a greater effect of Verbal Ability 
-on IQ than people with lower self-reported SES scores.
-
-$$ H_3: \beta_1, \beta_2, \beta_3 > 0 $$
+OPTIONAL: one >, other unconstrained
 
 ## Method
 
@@ -69,8 +60,7 @@ contains a total of three variables from 400 high school students and contains
 no missing data. The variables are Verbal Ability, which ranges from 2.26 to 4
 (*M* = 3.39, *SD* = 0.38), self-reported SES on a scale from 0 to 60 
 (*M* = 32.78, *SD* = 9.66) and IQ, which ranged from 85.5 to 143 (*M* = 118.2, *SD* = 11.92). 
-When visually 
-inspecting the histograms of the variables, we find that SES and IQ seem to follow
+When visually inspecting the histograms of the variables, we find that SES and IQ seem to follow
 a normal distribution. Verbal Ability, however, seems to be slightly skewed to the
 left which could be explained by a ceiling effect. For all analyses, 
 we grand mean centered the variable of Verbal Ability in order
@@ -143,7 +133,7 @@ fraction is decided by the following formula:
 $$ b = \frac{J}{N} $$
 
 where *b* is the denominator of the fraction, *J* is the number of independent constraints in the hypothesis and
-*N* is sample size. However, we will conduct a sensitivity analysis with varying numbers of *J* to
+*N* is sample size. Furthermore, we will conduct a sensitivity analysis with varying numbers of *J* to
 see the influence it has on the Bayes Factor. 
 
 ```{r The Gibbs/MH Sampler function, include=FALSE}
@@ -201,7 +191,7 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000,
       ## If through MH:
       ## First, we gain a proposal value through multiplying the lm estimate
       ## with a random sampled value of a T-distribution with df = 1
-      proposal_value <- 115.45 * rt(1, df = 1)
+      proposal_value <- 115.45920 + 1.95990 * rt(1, df = 1)
       ## Then calculate the acceptance ratio
       accept_ratio <- (dnorm(proposal_value, mean = 115.45, sd = 19.96)/dnorm(b0[i - 1], mean = 115.45, sd = 19.96)) * 
         (dt(b0[i - 1], df = 1)/dt(proposal_value, df = 1))
@@ -229,7 +219,7 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000,
     } else {
       ## If through MH:
       ## First, we gain a proposal value in a similar fashion as above
-      proposal_value <- 11.73 * rt(1, df = 1)
+      proposal_value <- 11.73647 + 1.45593 * rt(1, df = 1)
       ## Calculate acceptance ratio
       accept_ratio <- (dnorm(proposal_value, mean = 11.73, sd = 1.46)/dnorm(b1[i - 1], mean = 11.73, sd = 1.46)) * 
         (dt(b1[i - 1], df = 1)/dt(proposal_value, df = 1))
@@ -257,7 +247,7 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000,
     } else {
       ## If through MH:
       ## First, we gain a proposal value
-      proposal_value <- 0.08 * rt(1, df = 1)
+      proposal_value <- 0.08399 + 0.05738 * rt(1, df = 1)
       ## Calculate acceptance ratio
       accept_ratio <- (dnorm(proposal_value, mean = 0.08, sd = 0.06)/dnorm(b2[i - 1], mean = 0.08, sd = 0.06)) * 
         (dt(b2[i - 1], df = 1)/dt(proposal_value, df = 1))
@@ -348,7 +338,7 @@ mu2 <- 1
 sigma2 <- 10000
 
 ## Then run the GibbsSampler function with our data
-set.seed(3)
+
 Analysis.1<- GibbsSampler(dat$IQ, dat$verbal, dat$SES, burn.in = 2500, 
                             iterations = 12500, initial.values = c(1, 1, 1))
 
@@ -391,8 +381,8 @@ For our LR2 analysis, we found XXX.
 -- interpretation --
 
 For the final LR3 analysis, we found very similar results to the first analysis 
-with an intercept of 118.73 (95% *C.I.*: [114.49; 122.14]) and two regression
-coefficients of 12.00 (95% *C.I*: [9.08; 14.77]) and 0.054 (95% *C.I.*: [-0.11; 0.12]).
+with an intercept of 115.9261 (95% *C.I.*: [114.47; 122.21]) and two regression
+coefficients of 11.91 (95% *C.I*: [9.11; 14.77]) and 0.083 (95% *C.I.*: [-0.11; 0.11]).
 
 -- interpretation -- 
 
@@ -491,23 +481,45 @@ autocorrelationplot(V = LR3.dataframe$b1)
 autocorrelationplot(V = LR3.dataframe$b2)
 autocorrelationplot(V = LR3.dataframe$vari)
 ```
+When investigating the convergence of the three analyses, we found the following results.
+For LR1, the traceplots of all coefficients showed very sound convergence. The autocorrelation plots
+showed two notable results. For the intercept and regression coefficient for SES, the
+autocorrelation started at high values around .90 and then in a monotone decreasing fashion reached 0 at lag 45. 
+The other autocorrelation plots remained constant at values around 0 for every lag. 
+Although the autocorrelation could be improved upon, we feel it is still safe to assume
+the first model converged properly when also taking the traceplot into account. 
+
+The second analysis, LR2, ...
+
+For the final analysis, LR3, the traceplots for the coefficients of the independent 
+variables showed sound convergence. The traceplot for the intercept, while still 
+acceptable, showed that sometimes quite extreme values were accepted and
+convergence of this coefficient could be improved. The traceplot of the 
+variance, however, showed that there might have been some issues as the
+plot shows that somehow it wanted to accept negative values. Furthermore, some
+very extreme values were accepted, which might lead to issues if we were
+to use this model for model assumption checks through the posterior predictive
+*p*-value. The autocorrelation plots all showed constant values close to 0.
+Hence, taken together, we assume that the model converged adequately. However, due
+to the extreme values, we refrained from using this model to check the
+normality of the residuals through use of the posterior predictive *p*-value.
 
 ```{r PP P-values, include=FALSE}
 ## First, we set a seed for reproducibility
 set.seed(3)
 ## Then, we create an empty matrix with equal rows to our original dataset
 ## and as many columns as we would like datasets
-sim.data <- matrix(data = NA, nrow = 400, ncol = 1000)
+sim.data <- matrix(data = NA, nrow = 400, ncol = 5000)
 
 ## Then, we create space for the regression coefficients that we will sample
 ## so that we can use these to calculate the residuals later
-b0_t <- rep(NA, 1000)
-b1_t <- rep(NA, 1000)
-b2_t <- rep(NA, 1000)
-s2_t <- rep(NA, 1000)
+b0_t <- rep(NA, 5000)
+b1_t <- rep(NA, 5000)
+b2_t <- rep(NA, 5000)
+s2_t <- rep(NA, 5000)
 
 ## Now, we can start the data simulation through a for loop
-for(i in 1:1000) {
+for(i in 1:5000) {
   ## In every loop, we sample one value from all our regression coefficients
   b0_t[i] <- sample(LR1.dataframe$b0, 1)
   b1_t[i] <- sample(LR1.dataframe$b1, 1)
@@ -522,17 +534,17 @@ for(i in 1:1000) {
 
 ## Now, as a discrepancy measure, we calculate the residuals for every
 ## simulated Y values using their corresponding sampled regression coefficients
-residuals_sim <- matrix(data = NA, nrow = 400, ncol = 1000)
+residuals_sim <- matrix(data = NA, nrow = 400, ncol = 5000)
 
-for(i in 1:1000) {
+for(i in 1:5000) {
   residuals_sim[, i] <- sim.data[, i] - b0_t[i] - b1_t[i]*dat$verbal - b2_t[i]*dat$SES
 }
 
 ## For the observed dataset, we also calculate the residuals a 1000 times
 ## using the sampled regression coefficients
-residuals_obs <- matrix(data = NA, nrow = 400, ncol = 1000)
+residuals_obs <- matrix(data = NA, nrow = 400, ncol = 5000)
 
-for(i in 1:1000){
+for(i in 1:5000){
   residuals_obs[, i] <- dat$IQ - b0_t[i] - b1_t[i]*dat$verbal - b2_t[i]*dat$SES
 }
 
@@ -540,33 +552,33 @@ for(i in 1:1000){
 
 ## Then, for every column of residuals (simulated and observed), we calculate
 ## our original test statistic
-sim_skewness <- rep(NA, 1000)
-for(i in 1:1000) {
+sim_skewness <- rep(NA, 5000)
+for(i in 1:5000) {
   sim_skewness[i] <- (mean(residuals_sim[, i]) - median(residuals_sim[, i]))^2
 }
 
-obs_skewness <- rep(NA, 1000)
+obs_skewness <- rep(NA, 5000)
 
-for(i in 1:1000) {
+for(i in 1:5000) {
   obs_skewness[i] <- (mean(residuals_obs[, i]) - median(residuals_obs[, i]))^2
 }
 
 ## And we calculate the Posterior Predictive P-value by finding the proportion
 ## of times that our statistic is larger in the simulated residuals than 
 ## in the observed residuals
-ppp_value <- sum(sim_skewness > obs_skewness)/1000
+ppp_value <- sum(sim_skewness > obs_skewness)/5000
 ppp_value
 
 ## SKEWNESS STATISTIC ----------------------------------------------------------
 
 library(moments)
 
-obs_skew <- rep(NA, 1000)
-sim_skew <- rep(NA, 1000)
+obs_skew <- rep(NA, 5000)
+sim_skew <- rep(NA, 5000)
 
 ## Again, we calculate skewness a thousand times for both the observed
 ## and simulated residuals
-for(i in 1:1000) {
+for(i in 1:5000) {
   obs_skew[i] <- skewness(residuals_obs[, i])
   sim_skew[i] <- skewness(residuals_sim[, i])
 }
@@ -574,24 +586,39 @@ for(i in 1:1000) {
 ## And again, we calculate the posterior predictive p-value by finding the
 ## proportion of times that the skewness for simulated residuals is larger
 ## than the skewness in the observed residuals
-comparison_ppp <- sum(sim_skew > obs_skew)/1000
+comparison_ppp <- sum(sim_skew > obs_skew)/5000
 comparison_ppp
+
+## Visual inspection of the residuals in observed dataset
+hist(dat$IQ - 118.3201 - 11.92829 * dat$verbal - 0.003478761 * dat$SES)
 ```
 
+Checking the assumption of normality of residuals, we found a posterior
+predictive *p*-value of <.001 for both our original and skewness statistic. These
+*p*-values mean the following: for our original statistic, it entails that when using
+the same sampled coefficients from their posterior distribution to calculate
+the residuals, we find a larger difference between the mean and median of
+these residuals when using our observed dataset compared to using a simulated dataset.
+For the skewness statistic, it means also means that the calculated residuals
+in our observed dataset were practically always more skewed than the residuals
+in a simulated dataset.
+
+From these results, we can conclude two things. Firstly, our original statistic
+works properly to measure the skewness of a distribution as it gave the same
+results as the skewness statistic. Secondly, we can conclude that the residuals most likely do not
+follow a normal distribution and instead are skewed. This result is further
+strengthened by visual inspection of the residuals, which shows that the direction of the skew is to the right.
+
 ### Model comparison
+
+- probably sensitivity analysis for equality constraints shows that J matters
 
 ```{r Bayes Factor Calculations, include=FALSE}
 library(MASS)
 
-## Create a linear mo
-linearmodel <- lm(IQ ~ verbal + SES, data = dat)
-
-## OPTIES VOOR SAMPLING:
-    ## OPTIE 1
-Means <- linearmodel$coefficients[2:3]
-Sigma <- vcov(linearmodel)[2:3, 2:3]
-
-    ## OPTIE 2
+## To be able to get the multivariate posterior density, we get
+## the means and covariance matrix of the posterior distributions 
+## from the IV regression coefficients
 Means <- c(mean(LR1.dataframe$b1), mean(LR1.dataframe$b2))
 Sigma <- cov(LR1.dataframe[2:3])
 
@@ -609,17 +636,49 @@ b <- 6/400 ## 3 regression coefficients: 3 means, 3 variances --> 6
 prior <- mvrnorm(100000, mu = c(0, 0), Sigma = Sigma/b)
 
 ## Finally, we can calculate the Bayes Factor for all our hypotheses
+## by stating the correct statements
+
+## For hypothesis 1: 
+## For both the posterior and prior, we want the proportion of sampled values where both
+## regression coefficients are higher than 0 and divide them in the correct way
 BF.H1 <- (sum(posterior[, 1] > 0 & posterior[, 2] > 0)/100000) /
   (sum(prior[, 1] > 0 & prior[, 2] > 0)/100000)
-  
+
+## For hypothesis 2:
+## For both posterior and prior, the first regression coefficient should be higher
+## than 0 and the second one should be close to zero (i.e., -.1 < x < .1)
 BF.H2 <- (sum(posterior[, 1] > 0 & posterior[, 2] < .1 & posterior[, 2] > -.1)/100000) / 
   (sum(prior[, 1] > 0 & prior[, 2] < .1 & prior[, 2] > -.1)/100000)
 
+## For hypothesis 3:
+## Exactly the other way around from hypothesis 2
 BF.H3 <- (sum(posterior[, 2] > 0 & posterior[, 1] < .1 & posterior[, 1] > -.1)/100000) / 
   (sum(prior[, 2] > 0 & prior[, 1] < .1 & prior[, 1] > -.1)/100000)
+
+## Sensitivity analysis for H1 and H2
+BFH1_values <- rep(NA, 50)
+
+for(i in 1:50) {
+  b <- as.numeric(i) / 400
+  prior <- mvrnorm(100000, mu = c(0, 0), Sigma = Sigma/as.numeric(b))
+  BFH1_values[i] <- (sum(posterior[, 1] > 0 & posterior[, 2] > 0)/100000) /
+  (sum(prior[, 1] > 0 & prior[, 2] > 0)/100000)
+}
+
+plot(x = 1:50, y = BFH1_values, ylim = c(0, 5))
+
+BFH2_values <- rep(NA, 50)
+
+for(i in 1:50) {
+  b <- as.numeric(i) / 400
+  prior <- mvrnorm(100000, mu = c(0, 0), Sigma = Sigma/as.numeric(b))
+  BFH2_values[i] <- (sum(posterior[, 1] > 0 & posterior[, 2] < .1 & posterior[, 2] > -.1)/100000) / 
+  (sum(prior[, 1] > 0 & prior[, 2] < .1 & prior[, 2] > -.1)/100000)
+  
+}
+
+plot(x = 1:50, y = BFH2_values)
 ```
-
-
 
 ## Discussion
 
