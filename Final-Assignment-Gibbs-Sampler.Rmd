@@ -3,12 +3,15 @@ title: "Final Assignment - Gibbs Sampler"
 author: "Nina van Gerwen (1860852)"
 date: "3/1/2022"
 output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ## The Gibbs Sampler with an option for Metropolis-Hastings
 
-Because we assume that all predictors are normally distributed, the Gibbs
-Sampler can work in the following fashion.
+Because we assume that all predictors are normally distributed, the
+Gibbs Sampler can work in the following fashion.
 
 ```{r Gibbs + MH Sampler}
 ## First, all priors have to be set
@@ -207,9 +210,10 @@ GibbsSampler <- function(Y, X1, X2, burn.in = 1000, iterations = 10000,
 
 ## Autocorrelation plot
 
-Although we already created traceplots to assess convergence, it is always best
-to assess it in multiple ways. Hence, I'll make a function that, when given 
-all randomly sampled values for a parameter, will return an autocorrelation plot.
+Although we already created traceplots to assess convergence, it is
+always best to assess it in multiple ways. Hence, I'll make a function
+that, when given all randomly sampled values for a parameter, will
+return an autocorrelation plot.
 
 ```{r Autocor plot}
 
@@ -258,37 +262,46 @@ var(testdat$IQ)
 
 Guidelines voor proposal distribution:
 
-niet te breed niet te small... Je kan LM gebruiken om dan de estimate als mean te gebruiken en de standard error te gebruiken als variantie van proposal. (perhaps extra uncertainty toevoegen)
+niet te breed niet te small... Je kan LM gebruiken om dan de estimate
+als mean te gebruiken en de standard error te gebruiken als variantie
+van proposal. (perhaps extra uncertainty toevoegen)
 
-Voor hypothese testen: 
+Voor hypothese testen:
 
-je kan regressie coefficient gebruiken 
-(bv. H1: b1 > b2 // H2: b2 < b1 - hier moet je voor echter ze standardizeren)
-(bv. H1: b1 > 0 // H2: b2 > 0, H3: b1 & b2 > 0) - ofwel zelf programmeren (met behulp van multivariate normal distribution - posterior en prior) ofwel lm en dan bain
+je kan regressie coefficient gebruiken (bv. H1: b1 \> b2 // H2: b2 \<
+b1 - hier moet je voor echter ze standardizeren) (bv. H1: b1 \> 0 // H2:
+b2 \> 0, H3: b1 & b2 \> 0) - ofwel zelf programmeren (met behulp van
+multivariate normal distribution - posterior en prior) ofwel lm en dan
+bain
 
-je kan ook meerdere modellen gebruiken: bv een model met 2 predictors, een model met 2 predictors + 1 interactie, etc.
+je kan ook meerdere modellen gebruiken: bv een model met 2 predictors,
+een model met 2 predictors + 1 interactie, etc.
 
 Assessing convergence:
 
-multiple ways, so not just a traceplot (i.e., create autocorrelation plot function)
+multiple ways, so not just a traceplot (i.e., create autocorrelation
+plot function)
 
 voor autocorrelation plot:
 
-for-loop t van 1:50
-voor elke keer, heb twee vectors van een regressie coefficent,
-dan schuif je een vector t plaatsen omhoog (en wellicht n - t'de element
-verwijderen OF cor(..., use = 'pairwise.complete.obs')) en dan correlatie calculaten.
+for-loop t van 1:50 voor elke keer, heb twee vectors van een regressie
+coefficent, dan schuif je een vector t plaatsen omhoog (en wellicht n -
+t'de element verwijderen OF cor(..., use = 'pairwise.complete.obs')) en
+dan correlatie calculaten.
 
 Voor eindopdracht:
 
 To convert Rmarkdown to Rfile:
 
-In Rstudio run: knitr::purl.("Mymarkdownfile.Rmd")  
+In Rstudio run: knitr::purl.("Mymarkdownfile.Rmd")
 
-It will create an R file "Mymarkdownfile.R" in your working directory which contains only Rcode. You may want to trim out some markdown junk code that is not needed afterwards. You can also build in that you also produce an R code file  as you knit (see first linkt below).
+It will create an R file "Mymarkdownfile.R" in your working directory
+which contains only Rcode. You may want to trim out some markdown junk
+code that is not needed afterwards. You can also build in that you also
+produce an R code file as you knit (see first linkt below).
 
 More info here:
-https://bookdown.org/yihui/rmarkdown-cookbook/purl.html
+<https://bookdown.org/yihui/rmarkdown-cookbook/purl.html>
 
 ```{r}
 set.seed(3)
@@ -300,7 +313,6 @@ GibbsSampler(testdat$IQ, testdat$verbal, testdat$SES, burn.in = 5000, iterations
 set.seed(3)
 GibbsSampler(testdat$IQ, testdat$verbal, testdat$SES, burn.in = 5000, iterations = 25000, initial.values = c(1, 1, 1), method = c("1", "1", "1"))
 ```
-
 
 POSTERIOR PREDICTIVE P-VALUE
 
@@ -367,7 +379,11 @@ second_p <- sum(sim_skew > obs_skew)/1000
 second_p
 
 ```
-This means that 24.7% of the time, the mean - median squared of the residuals in a simulated dataset are larger than in the observed dataset. in other words, 24.7% of the time, the residuals in a simulated dataset follow a less normally distributed distribution?
+
+This means that 24.7% of the time, the mean - median squared of the
+residuals in a simulated dataset are larger than in the observed
+dataset. in other words, 24.7% of the time, the residuals in a simulated
+dataset follow a less normally distributed distribution?
 
 ## Bayes Factor
 
@@ -405,13 +421,12 @@ BFH12 <- BF_H1 / BF_H2
 
 ```
 
-
 VRAGEN MORGEN:
 
-- kan je h0: b1 > 0, b2 unconstrained doen?
-- sensitivity analysis
-- waarom positieve covariance in bayesian, negatieve in lm?
-- moet je voor elke bayes factor calculatie opnieuw samplen?
+-   kan je h0: b1 \> 0, b2 unconstrained doen?
+-   sensitivity analysis
+-   waarom positieve covariance in bayesian, negatieve in lm?
+-   moet je voor elke bayes factor calculatie opnieuw samplen?
 
 ```{r}
 
@@ -442,4 +457,3 @@ for(i in 1:50) {
 
 plot(x = 1:50, y = BFH1_values, ylim = c(0, 5))
 ```
-
