@@ -15,27 +15,26 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-Bayesian Statistics is a field of statistics that is based on another
-interpretation of probabilities. In Bayesian Statistics, a probability
-can be viewed as a quantification of personal belief in an event (de
-Finetti, Bruno (2017). Theory of Probability: A critical introductory
-treatment. Chichester: John Wiley & Sons Ltd.).
+Bayesian Statistics is a field of statistics that is based on a different
+interpretation of probability than Frequentist Statistics, where a probability
+is seen as an event's relative frequency over time (Hájek, 2019). 
+In Bayesian Statistics, a probability is viewed as a quantification of personal belief in an event (de
+Finetti, 2017).
 
 Methods used in the field of Bayesian statistics have seen a rise 21st
 century due to more powerful software and algorithms like Markov Chain
-Monte Carlo (Fienberg, Stephen E. (2006). "When Did Bayesian Inference
-Become "Bayesian"?". Bayesian Analysis. 1 (1): 1--40.). However,
+Monte Carlo (Fienberg, 2006). However,
 Bayesian Statistics is also often seen as a possible answer to the
 replication crisis that plagues multiple disciplinary fields - a few of
 which are psychology, medicine and economics. This is partly because
 statistical issues that come from Frequentist significance testing
-(e.g., p-hacking) are not part of Bayesian statistics.
+(e.g., p-hacking) do not turn up in Bayesian Statistics.
 
-The goal of the current paper is to get more acquainted with Bayesian
-methods by performing a multiple linear regression through Bayesian
-methods. To be more specific, we will investigate the predictive ability
+The goal of the current paper is to get more acquainted with the Bayesian
+framework by performing a multiple linear regression through Bayesian
+methods. To be specific, we will investigate the predictive ability
 of Social Economical Status (SES) and Verbal Ability on intelligence as
-measured by the Intelligence Quotient (IQ) in a Bayesian setting.
+measured by the Intelligence Quotient (IQ).
 
 ```{r Loading the data, include=FALSE}
 library(haven)
@@ -51,7 +50,7 @@ dat$verbal <- dat$verbal - mean(dat$verbal)
 
 In this paper, we will aim to research whether IQ can be predicted by
 SES and Verbal Ability. To answer this research question, we have come
-up with a total of four hypotheses.
+up with a total of three hypotheses.
 
 -   IQ in students is predicted by both their Verbal Ability, while
     statistically controlling for SES, and their SES, while controlling
@@ -88,80 +87,86 @@ to aid convergence and interpretation.
 
 ### Statistical analyses
 
-To answer our research questions and hypotheses, we will run two
-Bayesian linear regression analyses. In the first analyses, we will use
-Gibbs Sampling with uninformative prior distributions (LR1) for the
-estimation of our regression coefficients. Below, the choice for prior
-distributions will be further explained. 
-For the second analysis, regression coefficients will be
-estimated through an independent Metropolis-Hastings (MH) Sampler (LR2),
-where the proposal distribution is a Student's *t*-distribution with 1
-degree of freedom in order to maximize the uncertainty in the tails.
+To answer our research questions and test the hypotheses, we ran
+two Bayesian linear regression analyses. In the first analyses, we 
+used Gibbs Sampling with uninformative prior distributions (LR1) for the
+estimation of our regression coefficients. Below, the choice for our prior
+distributions is further explained. For the second analysis,
+regression coefficients were estimated through an independent
+Metropolis-Hastings (MH) Sampler (LR2), where the proposal distribution
+was a Student's *t*-distribution with 1 degree of freedom in order to
+maximize uncertainty in the tails of the distribution.
 
 #### Prior distributions
 
-As stated above, we will use uninformative priors for the Gibbs Sampler.
-Although there is historical data on the effect of verbal
-comprehension on intelligence, research in this area tends to be of a more 
-psychometric nature (e.g., the *g* factor model, where general mental
-ability is supposedly divided in 7 subfactors of intelligence - one of which
-is verbal comprehension (Spearman, C.E. (1904). General intelligence', Objectively Determined And Measured. American Journal of Psychology. 15 (2): 201–293)). Due to the different methods, we were unsure how to use this information in
-the specification of our priors and instead chose for uninformative priors. 
-This means that for the
-intercept and regression coefficients, the prior distributions will have
-an extremely large variance and a mean that then becomes obsolete. Hence, we
-will simply set the mean to 1. Finally, for the variance coefficient, which
-follows a gamma distribution, the scaling and rating parameter will be set
-close to 0.
+As stated before, we used uninformative priors for LR1. There were multiple
+reasons for this. First and foremost, the goal of the paper was to get more
+acquainted with the Bayesian framework. Hence, the analyses were of secondary
+importance and we did not wish to bias them with our expectations.
+Secondly, although there is historical data available 
+on the effect of some of our independent variables 
+on intelligence, research in this area tends to be of a more
+psychometric nature. For example, the effect of Verbal Ability on IQ can be found
+in factor analyses such as the *g* factor model, where general mental
+ability is supposedly divided in 7 subfactors of intelligence - one of
+which is verbal comprehension (Spearman, 1904). However, due to the different methods, we were
+unsure how to translate this information to the specification of our priors.
+Instead, we chose for uninformative priors. This means that for the
+intercept and regression coefficients, the prior distributions had
+an extremely large variance and a mean that then becomes obsolete (i.e., we
+simply set it to 1). Finally, for the variance
+coefficient, which follows a gamma distribution, the scaling and rating
+parameter were set close to 0.
 
 ### Model diagnostics
 
-First, we will assess the convergence of all analyses through visual
+To investigate the quality of our analyses, we did the following.
+First, we assessed the convergence of all analyses through visual
 inspection of both traceplots and autocorrelation plots.
 
-Second, we will assess which of the two different sampling methods
-performed better. To compare the two models and choose the best model,
-we will use the Deviance Information-Criterion (DIC).
+Second, we evaluated which of the two different sampling methods
+performed better. To compare the two models and choose the best one,
+we used the Deviance Information-Criterion (DIC).
 
-Finally, for the chosen model, we will assess whether the residuals of
-our model are normally distributed through use of the posterior
+Finally, for the chosen model, we gauged whether the residuals of
+our model were normally distributed through use of the posterior
 predictive *p*-value and discrepancy measures with the following
 original test statistic:
 
 $$ T = (\mu - m_1)^2$$ where $\mu$ is the mean and $m_1$ is the median
 of the distribution of the residuals. The reasoning behind the statistic
 is that the more skewed a distribution is, the larger the difference
-between the mean and median will be. However, this difference can be
+between the mean and median is. However, this difference can be
 either negative (in a left-skewed distribution) or positive (in a
 right-skewed distribution). Hence, we square the difference in order to
 always gain a positive value. Now, the larger the statistic is, the
 larger the absolute difference between mean and median, and the more
 skewed a distribution supposedly is.
 
-To investigate whether our original statistic works, we will compare the
-results to a posterior predictive *p*-value with the known statistic of
+To investigate whether our original statistic works correctly, we will compare the
+results to a posterior predictive *p*-value that uses the known statistic of
 skewness:
 
 $$ \tilde{\mu}_3 = \frac{\Sigma_i^N(X_i - \bar{X})^3}{(N - 1) \cdot \sigma^3} $$
-where $\bar{X}$ is the mean of the residuals and $\sigma$ the standard
-deviation of the residuals. Skewness is known to measure the asymmetry
-of a distribution. Therefore, we will use it to see whether the results
+where $\bar{X}$ is the mean of the residuals, $\sigma$ the standard
+deviation of the residuals and *N* is the total number of residuals.
+Skewness is known to measure the asymmetry
+of a distribution. Therefore, we used it to see whether the results
 are similar to the results of our original test statistic.
 
 ### Hypothesis support
 
-Besides answering the hypotheses, we also want to see which hypothesis
-has the most support. To do this, we will compare the three hypotheses (and
-their corresponding statistical models) through the use of both the
-Bayes' Factor. When comparing the hypotheses through the Bayes' Factor, the priors
-distributions will be fractional, where the size of the fraction is
-decided by the following formula:
+Besides answering the hypotheses, we also wanted to see which hypothesis
+had the most support. To achieve this, we compared the three hypotheses through 
+use of the Bayes' Factor. When comparing the hypotheses through the Bayes' Factor,
+the priors distributions were fractional, where the size of the
+fraction was decided by the following formula:
 
 $$ b = \frac{J}{N} $$
 
 where *b* is the denominator of the fraction, *J* is the number of
-independent constraints in the hypothesis and *N* is sample size.
-Furthermore, we will conduct a sensitivity analysis with varying numbers
+independent constraints in the hypotheses and *N* is sample size.
+Furthermore, we conducted a sensitivity analysis with varying numbers
 of *J* to see the influence it has on the Bayes' Factor.
 
 ```{r The Gibbs/MH Sampler function, include=FALSE}
@@ -386,6 +391,21 @@ regression coefficient of 11.93 (95% *C.I.*: [9.11; 14.77]) and for the
 effect of SES on IQ, we found a regression coefficient of 0.003 (95%
 *C.I.*: [-0.11; 0.11]).
 
+The intercept parameter tells us that when a student has a self-reported SES
+of 0 and an average Verbal Ability, he has a predicted IQ of 118. With the
+credible interval, we also know that with 95% certainty the predicted IQ of the
+student lies between 114.47 and 122.21.
+
+For Verbal Ability, the results mean that for every one unit increase above the mean a student scores on 
+Verbal Ability, their predicted IQ increases on average by 11.93. Furthermore,
+we can state that there is a 95% probability that the true effect of Verbal Ability on IQ
+lies between 9.11 and 14.77. 
+
+As for the effect of self-reported SES on IQ, we found that
+the point estimate is immensely close to 0 and there is a 95% probability
+that the true parameter lies between -0.11 and 0.11. These results both
+indicate that SES might not be able to predict IQ. 
+
 -- interpretation --
 
 For our LR2 analysis, we found very similar results to the first
@@ -501,9 +521,11 @@ intercept, while still acceptable, showed that sometimes quite extreme
 values were accepted and convergence of this coefficient could be
 improved. The traceplot of the variance, however, showed that there
 might have been some issues as the plot shows that somehow it wanted to
-accept negative values. Furthermore, some very extreme values were
-accepted, which might lead to issues if we were to use this model for
-model assumption checks through the posterior predictive *p*-value. The
+accept negative values.
+
+REWRITE THIS PART: Furthermore, some very extreme values were accepted,
+which might lead to issues if we were to use this model for model
+assumption checks through the posterior predictive *p*-value. The
 autocorrelation plots all showed constant values close to 0. Hence,
 taken together, we assume that the model converged adequately. However,
 due to the extreme values, we refrained from using this model to check
@@ -515,8 +537,7 @@ for the two analyses, is that they all consisted of only one chain. This
 means that it is possible that the analyses are stuck at a local
 maximum. However, considering that the analyses gave similar results
 that seem to agree with the results of a Frequentist linear regression,
-we feel safe to assume that the analyses were not stuck at local
-maximums.
+we feel safe to assume that the analyses were not stuck at local maxima.
 
 #### Model comparison
 
@@ -566,13 +587,14 @@ Gibbs_DIC
 MH_DIC <- DIC(dat$IQ, dat$verbal, dat$SES, LR2.dataframe[1:4])
 MH_DIC
 ```
-Comparing the two models through use of the DIC, we calculated that LR1 had
-a DIC value of 3061.983, whereas LR2 had a DIC value of 3168.71 ($\Delta_{DIC} = 106.73$. 
-With these
-results, we can conclude that LR1, the analysis that made use of a Gibbs
-Sampler, performed better than the MH-sampler as it has a DIC that is much lower. 
-Hence, from now on we will only continue discussing the results that were gained
-from this statistical model. 
+
+Comparing the two models through use of the DIC, we calculated that LR1
+had a DIC value of 3061.983, whereas LR2 had a DIC value of 3168.71
+($\Delta_{DIC} = 106.73$. With these results, we can conclude that LR1,
+the analysis that made use of a Gibbs Sampler, performed better than the
+MH-sampler as it has a DIC that is much lower. Hence, from now on we
+will only continue discussing the results that were gained from this
+statistical model.
 
 #### Distribution of the residuals
 
@@ -665,16 +687,16 @@ comparison_ppp
 hist(dat$IQ - 118.3201 - 11.92829 * dat$verbal - 0.003478761 * dat$SES)
 ```
 
-Checking the assumption of normality, we found posterior
-predictive *p*-values of <.001 for both our original and skewness
-statistic. These *p*-values mean the following: for our original
-statistic, it entails that when using the same sampled coefficients from
-their posterior distribution to calculate the residuals, we find a
-larger difference between the mean and median of these residuals when
-using our observed dataset compared to using a simulated dataset. For
-the skewness statistic, it means also means that the calculated
-residuals in our observed dataset were practically always more skewed
-than the residuals in a simulated dataset.
+Checking the assumption of normality, we found posterior predictive
+*p*-values of \<.001 for both our original and skewness statistic. These
+*p*-values mean the following: for our original statistic, it entails
+that when using the same sampled coefficients from their posterior
+distribution to calculate the residuals, we find a larger difference
+between the mean and median of these residuals when using our observed
+dataset compared to using a simulated dataset. For the skewness
+statistic, it means also means that the calculated residuals in our
+observed dataset were practically always more skewed than the residuals
+in a simulated dataset.
 
 From these results, we can conclude two things. Firstly, our original
 statistic works properly to measure the skewness of a distribution as it
@@ -753,30 +775,34 @@ for(i in 1:50) {
 plot(x = 1:50, y = BFH2_values)
 ```
 
-... discover
-
+Calculating the support for each hypothesis gave the following results:
 $H_1$ had a Bayes' Factor of 1.99. $H_2$ had a Bayes' Factor of 10.83.
-$H_3$ had a Bayes' Factor of 0. From these results, we can infer the following.
+$H_3$ had a Bayes' Factor of 0. From these results, we can infer the
+following.
 
-$H_3$, which stated that there was no effect of Verbal Ability on IQ, has practically no support. 
-This means that the other hypotheses also have
-infinitely more support than $H_3$. In other words, we can very safely conclude
-that there most likely is a positive effect of Verbal Ability on IQ. 
+$H_3$, which stated that there was no effect of Verbal Ability on IQ,
+has practically no support. This means that the other hypotheses also
+have infinitely more support than $H_3$. In other words, we can very
+safely conclude that there most likely is a positive effect of Verbal
+Ability on IQ.
 
-Comparing $H_1$ to $H_2$, we discover that $H_2$ has 5.45 times more support
-than $H_1$. Hence, there is more evidence that SES has no effect on IQ
-than that SES has a positive effect on IQ. However, the sensitivity analyses
-of the first two hypotheses should be taken into account. Namely, although the Bayes'
-Factor of $H_1$ remains constant, the Bayes' Factor for $H_2$ seems to be monotone
-decreasing to a limit of 4 with increasing values of *J*. 
-Such a result was to be expected due to the fact that
-$H_2$ uses an equality constraint, for which the value of *J* matter more. 
-This would entail that $H_2$ has only around 2 - 2.5 times more
-support than $H_1$, which affects the strength of our conclusion. Nonetheless,
-we can still state that there most likely is no effect of SES on IQ. 
-
+Furthermore, when comparing $H_1$ to $H_2$ we discover that $H_2$ has
+5.45 times more support than $H_1$. Hence, there is more evidence that
+SES has no effect on IQ than that SES has a positive effect on IQ.
+However, the sensitivity analyses of the first two hypotheses should be
+taken into account. Namely, although the Bayes' Factor of $H_1$ remains
+constant, the Bayes' Factor for $H_2$ seems to be monotone decreasing to
+a limit of 4 with increasing values of *J*. Such a result was to be
+expected due to the fact that $H_2$ uses an equality constraint, for
+which the value of *J* matter more. This would entail that $H_2$ has
+only around 2 - 2.5 times more support than $H_1$, which affects the
+strength of our conclusion. Nonetheless, we can still state that there
+most likely is no effect of SES on IQ.
 
 ## Discussion
+
+In the current paper, we have investigated the xxx using Bayesian
+methods.
 
 -   answer of the research question
 
@@ -789,3 +815,12 @@ we can still state that there most likely is no effect of SES on IQ.
     meerdere sectoren, maar wellicht zit het antwoord niet per se in
     welke statistiek je doet maar in het goed gebruiken ervan (zie
     hierboven)
+
+## References
+
+de Finetti, B. (2017). *Theory of Probability: A critical introductory treatment*. Chichester: John Wiley & Sons Ltd.      
+Fienberg, S.E. (2006). When Did Bayesian Inference Become "Bayesian*?. *Bayesian Analysis. 1*(1): 1--40.      
+Hájek, A. (2019). *Interpretations of Probability*, The Stanford Encyclopedia of Philosophy (Fall 2019 Edition), Edward N. Zalta (ed.).     
+Spearman, C.E. (1904). General intelligence, Objectively Determined And Measured. *American Journal of Psychology. 15*(2): 201--293.     
+
+
