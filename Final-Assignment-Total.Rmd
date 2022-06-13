@@ -75,7 +75,7 @@ up with a total of three hypotheses.
     self-reported SES are predicted to have higher IQ scores.
     $$ H_3: \beta_1 \approx 0, \beta_2 > 0 $$
 
-## Method
+## Methods
 
 ### Description of the data
 

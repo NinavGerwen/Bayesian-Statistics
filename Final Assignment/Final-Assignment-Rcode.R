@@ -2,15 +2,12 @@
 knitr::opts_chunk$set(echo = TRUE)
 
 
-## ----Loading the data, include=FALSE---------------------------------------------------------------------------------
+## ----Loading the data and descriptive statistics, include=FALSE---------------------------------------------------------------------------------
 library(haven)
 
 dat <- read_sav(file = "Week6Data2.sav")
 
 dat <- dat[, 2:4]
-
-dat$verbal <- dat$verbal - mean(dat$verbal)
-
 
 ## ----Descriptive statistics, include = FALSE-------------------------------------------------------------------------
 ## For ranges and means:
@@ -23,6 +20,9 @@ sd(dat$IQ)
 hist(dat$verbal, breaks = 20)
 hist(dat$SES)
 hist(dat$IQ)
+
+## To grand mean center the variable of verbal ability
+dat$verbal <- dat$verbal - mean(dat$verbal)
 
 
 ## ----The Gibbs/MH Sampler function, include=FALSE--------------------------------------------------------------------
