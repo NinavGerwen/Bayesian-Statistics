@@ -1,7 +1,7 @@
 ---
-title: "Final Assignment - Bayesian Statistics"
+title: "A Perspective on the Use of Bayesian Methods as a Possible Solution to the Replication Crisis"
 author: "Nina van Gerwen (1860852)"
-date: "15/06/2022"
+date: "13/06/2022"
 output: pdf_document
 editor_options: 
   markdown: 
@@ -24,7 +24,7 @@ relative frequency over time (Hájek, 2019). Instead, in Bayesian
 Statistics, a probability is viewed as a quantification of personal
 belief in an event (de Finetti, 2017).
 
-Methods used in the field of Bayesian statistics have seen a rise 21st
+Methods used in the field of Bayesian statistics have seen a rise in the 21st
 century due to more powerful software and algorithms like Markov Chain
 Monte Carlo (Fienberg, 2006). Furthermore, Bayesian Statistics is also
 often seen as a possible answer to the replication crisis (e.g., Cumming, 2014; Romero, 2019) 
@@ -37,9 +37,10 @@ The goal of the current paper is to get more acquainted with the
 Bayesian framework by performing a multiple linear regression through
 Bayesian methods. To be specific, we will investigate the predictive
 ability of Social Economical Status (SES) and Verbal Ability on
-intelligence as measured by the Intelligence Quotient (IQ).
+intelligence as measured by the Intelligence Quotient (IQ). Afterwards,
+we discuss the differences that we experienced by using Bayesian methods versus 
+standard Frequentist methods for our analyses.
 
--- hier nog even toevoegen wat er nog meer gedaan wordt -- 
 
 ```{r Loading the data, include=FALSE}
 library(haven)
@@ -53,7 +54,7 @@ dat$verbal <- dat$verbal - mean(dat$verbal)
 
 ### Hypotheses
 
-In this paper, we will aim to research whether IQ can be predicted by
+In this paper, we aim to research whether IQ can be predicted by
 SES and Verbal Ability. To answer this research question, we have come
 up with a total of three hypotheses.
 
@@ -91,9 +92,9 @@ hist(dat$SES)
 hist(dat$IQ)
 ```
 
-For our dataset, we chose one gained from Multivariate Statistics. The
-dataset contains a total of three variables from 400 high school
-students and contains no missing data. The variables are Verbal Ability,
+The chosen dataset, obtained from the course Multivariate Statistics, 
+contains a total of three variables from 400 high school
+students. Furthermore, there is no missing data. The variables are Verbal Ability,
 which ranges from 2.26 to 4 (*M* = 3.39, *SD* = 0.38), self-reported SES
 on a scale from 0 to 60 (*M* = 32.78, *SD* = 9.66) and IQ, which ranged
 from 85.5 to 143 (*M* = 118.2, *SD* = 11.92). When visually inspecting
@@ -147,8 +148,10 @@ inspections. First, we assessed the convergence of all analyses through
 visual inspection of both trace- and autocorrelation plots. Second, we
 evaluated which of the two different sampling methods performed better.
 To compare the two models and choose the best one, we used the Deviance
-Information-Criterion (DIC).
-
+Information-Criterion (DIC). The DIC is a certain type of Information-Criterion, which 
+are often used for model selection by balancing fit and complexity. In the DIC, complexity
+is calculated through estimation of the effective number of parameters instead of
+simply counting the number of parameters (e.g., Alkaike Information Criterion).
 Finally, for the chosen model, we gauged whether the residuals of our
 model were normally distributed through use of the posterior predictive
 *p*-value and discrepancy measures with the following original test
@@ -158,8 +161,8 @@ $$ T = (\mu - m_1)^2$$ where $\mu$ is the mean and $m_1$ is the median
 of the distribution of the residuals. The reasoning behind the statistic
 is that the more skewed a distribution is, the larger the difference
 between the mean and median is. However, this difference can be either
-negative (in a left-skewed distribution) or positive (in a right-skewed
-distribution). Hence, we square the difference in order to always gain a
+negative - in a left-skewed distribution - or positive - in a right-skewed
+distribution. Hence, we square the difference in order to always gain a
 positive value. Now, the larger the statistic is, the larger the
 absolute difference between mean and median, and the more skewed a
 distribution supposedly is.
@@ -414,16 +417,12 @@ SES on IQ, we found a regression coefficient of 0.003 (95% *C.I.*:
 
 The intercept parameter tells us that when a student has a self-reported
 SES of 0 and an average Verbal Ability, he has a predicted IQ of 118.
-With the credible interval, we also know with 95% certainty that the IQ
-of the student lies between 114.47 and 122.21.
-
-For Verbal Ability, the results mean that for every one unit increase
+With the credible interval, we also know with 95% certainty that the true IQ
+of the student lies between 114.47 and 122.21. For Verbal Ability, the results mean that for every one unit increase
 above the mean a student scores on Verbal Ability, their predicted IQ
 increases on average by 11.93. Furthermore, we can state that there is a
 95% probability that the true effect of Verbal Ability on IQ lies
-between 9.11 and 14.77.
-
-As for the effect of self-reported SES on IQ, we found that the point
+between 9.11 and 14.77. As for the effect of self-reported SES on IQ, we found that the point
 estimate is immensely close to 0 and there is a 95% probability that the
 true parameter lies between -0.11 and 0.11. These results both indicate
 that SES cannot predict IQ.
@@ -538,26 +537,23 @@ For the second analysis, LR2, the traceplots for the coefficients of the
 independent variables showed sound convergence. The traceplot for the
 intercept, while still acceptable, showed that sometimes quite extreme
 values were accepted and convergence of this coefficient could be
-improved. The traceplot of the variance, however, showed that there
-might have been some issues as the plot shows only half of what you
+improved. The traceplot of the variance showed that there
+were issues as the plot shows only half of what you
 would expect from a good convergence. This can be explained by the fact
-that the algorithm somehow wanted to accept negative values, however,
-due to a nature of a variance, this is impossible. Furthermore, some
+that the algorithm most likely wanted to accept negative values. However,
+due to a nature of a variance, this is impossible. Furthermore, a few
 very extreme values were accepted for variances, which might lead to
 issues if we were to use this model for model assumption checks through
 the posterior predictive *p*-value. In contrast to this result, the
 autocorrelation plots all showed constant values close to 0. This result is indicative
 of two things. Namely, that convergence is sound and that we chose proper proposal distributions
-for our regression coefficients. 
-Hence, we still assumed that the model converged adequately.
+for our regression coefficients. Hence, we still assumed that the model converged adequately.
 
--- HIER NOG ZEGGEN: low autocorrelatiosn show
-
--- MISSCHIEN NOG mULTIPLE CHAINS TOEVOEGEN -- An important limitation to
+An important limitation to
 keep in mind when assessing the convergence for the two analyses, is
 that they all consisted of only one chain. This means that it is
-possible that the analyses are stuck at a local maximum. However,
-considering that the analyses gave similar results that seem to agree
+possible that the analyses were stuck at a local maximum. However,
+considering that the two analyses gave similar results that both seem to agree
 with the results of a Frequentist linear regression, we feel safe to
 assume that the analyses were not stuck at local maxima.
 
@@ -715,9 +711,9 @@ Checking the assumption of normality, we found posterior predictive
 *p*-values of \<.001 for both our original and skewness statistic. These
 *p*-values mean the following: for our original statistic, it entails
 that when using the same sampled coefficients from their posterior
-distribution to calculate the residuals, we find a larger difference
-between the mean and median of these residuals when using our observed
-dataset compared to using a simulated dataset. For the skewness
+distribution to calculate the residuals, we find a larger squared difference
+between the mean and median of these residuals when used on our observed
+dataset compared to when it was used on a simulated dataset. For the skewness
 statistic, it means also means that the calculated residuals in our
 observed dataset were practically always more skewed than the residuals
 in a simulated dataset.
@@ -814,7 +810,7 @@ two hypotheses should be taken into account. Namely, although the Bayes'
 Factor of $H_1$ remains constant, the Bayes' Factor for $H_2$ seems to
 be monotone decreasing to a limit of 4 with increasing values of *J*.
 Such a result was to be expected due to the fact that $H_2$ uses an
-equality constraint, for which the value of *J* matter more. This would
+equality constraint. This would
 entail that $H_2$ has only around 2 - 2.5 times more support than $H_1$,
 which affects the strength of our conclusion. Nonetheless, we can still
 state that there most likely is no effect of SES on IQ.
@@ -830,54 +826,39 @@ was not able to predict IQ, as stated in $H_2$.
 Now, let us hypothesize what the results would be if we had used Frequentist methods.
 A normal linear regression would have shown a non-significant effect of SES and
 a significant effect of Verbal Ability. Thus, we would most likely reach a similar
-conclusion as we had reached through the Bayesian methods. However, by using
-Bayesian methods, we were able to find support for the conclusion in multiple ways.
-Namely, through among other things, the size of the credible intervals and the Bayes' factor.
-In other words, we would argue that the Bayesian framework allows for much more flexibility.
-
---
-
-This flexibility extends to multiple things: for example, the analyses 
-that can be done with either Gibbs Sampling using either un- or informative
-priors or with MH sampler (which can also be done in multiple ways). All these
-choices can affect the results and conclusions, however, they also allow you to
-finepick them in order to fit your research in the best way possible. 
-
--- OTHER WAYS BAYESIAN ANALYSIS DIFFERED --
+conclusion. However, by using
+Bayesian methods, we were able to find support for this conclusion in multiple ways.
+Namely, through among other things the size of the credible intervals and the Bayes' factor.
+In other words, we would argue that the Bayesian methods allowed for much more flexibility
+than their Frequentist analog for the current paper.
+This flexibility extended to multiple facets in the analyses. For example, the analyses 
+could have been done with either Gibbs Sampling (using either un- or informative
+priors) or with MH sampler (which can also be done in multiple ways). All these
+choices can slightly alter your results and conclusions. However, they also allow you to
+finetune your analysis in order to fit your research in the best way possible compared
+to running a simple Frequentist linear regression.
 
 Besides flexibility for gaining evidence for our conclusion, the Bayesian methods
-also differ in how we ended up forming the conclusion. The Bayesian framework strafes
+also differed in how we ended up forming the conclusion. The Bayesian framework strafes
 away from the dichotomy of significance testing where there either is a significant
-effect or there is not. Instead, the Bayesian framework tells us about the
-support every hypothesis has and what is most likely, given the data.
---
+effect or there is not. Instead, the Bayesian framework tells us about the relative
+support every hypothesis had and what would most likely be true in the population, given the data.
 
-As stated in the Introduction, Bayesian Statistics is sometimes seen as a possible
-answer to the replication crisis. We are unsure, however, whether we agree with 
-this statement. Although issues such as *p*-hacking are resolved, other issues could
-arise. An example would be choosing a posterior predictive *p*-value that
+Reflecting back to the Introduction, where it was stated that Bayesian Statistics is sometimes seen as a possible
+answer to the replication crisis. After performing a few Bayesian analyses ourselves, we are unsure whether we agree with 
+this statement. This is partly due to the fact that, although issues such as *p*-hacking are resolved, other issues could
+arise. An example would be choosing a posterior predictive *p*-value after your analyses that
 gives you the result you are looking for. In both cases, the real answer to the
 replication crisis would be open science and pre-registration, not the exact field
 of statistics you use. Nonetheless, by programming multiple Bayesian methods ourselves
-(e.g., Gibbs Sampler or Bayes' Factor), we did come to realize the amount of 
+(e.g., Gibbs Sampler and Bayes' Factor), we did come to realize the amount of 
 theory that is behind all these methods that we had to understand in
 order to be able to use them and answer a frankly quite simple research question. 
-We believe that if everybody dove this deep into the methods required, science as a whole would benefit compared
-to the current situation in Frequentist Statistics, where a linear regression requires only a single line
-of code with a bare minimum amount of understanding.
-
--   answer of the research question
-
--   Differences between Bayesian and Frequentist analyses (relevant to
-    the context of the research questions 
-    --\> praten over hoe het
-    programmeren van een simpele regressie mij doet beseffen hoeveel
-    theorie en wetenschap er eigenlijk achter zit (ook al word het nu
-    overal gebruikt met een simpele line of code / 3 klikjes) --\>
-    bayesian kwam op als een soort antwoord op de replicatie crisis in
-    meerdere sectoren, maar wellicht zit het antwoord niet per se in
-    welke statistiek je doet maar in het goed gebruiken ervan (zie
-    hierboven)
+We believe that if everybody were to dive this deep into the methods required, science as a whole could benefit.
+Especially when compared to the current situation in Frequentist Statistics, 
+where a linear regression requires only a single line of code with a bare minimum amount of understanding.
+To conclude, we believe more emphasis should be placed on not only understanding the methods used
+for analyses, but also ethical science practices such as pre-registration and open science. 
 
 \pagebreak
 
